@@ -9,36 +9,40 @@ import pika, sys, time
 
 
 print("## NAC Integrator Start up")
-connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+credentials = pika.PlainCredentials('guest', 'password')
+connection = pika.BlockingConnection(pika.ConnectionParameters('localhost', 5672, '/', credentials))
 channel = connection.channel()
-#
 channel.exchange_declare(exchange='topics', exchange_type='topic', durable=True)
 #
 result = channel.queue_declare(queue='', exclusive=False, durable=True)
 queue_name = result.method.queue
 #
 
-## Topics
+## Publish Topics
 request_image     = 'Request.Image'
 request_data      = 'Request.Data'
-request_access    = 'Request.Access'
-request_weather   = 'Request.Weather'
+auth_request      = 'Authentication.Request'
 data_info         = 'Data.Info'
+status_update     = 'Status.Update'
+request_access    = "Request.Access"
+
+
+## Subscribe topics
 failure_network   = 'Failure.Network'
 event_nac         = 'Event.NAC'
 request_database  = 'Request.Database'
 data_response     = 'Data.Response'
-access_response   = 'Access.Response'
-failure_component = 'Failure.Component'
-weather           = 'Weather'
+device_found      = 'Device.Found'
+auth_response     = 'Authentication.Response'
+access_response   = "Access.Reponse"
 
+## Bind
 channel.queue_bind(exchange='topics', queue=queue_name, routing_key=failure_network)
-channel.queue_bind(exchange='topics', queue=queue_name, routing_key=failure_component)
 channel.queue_bind(exchange='topics', queue=queue_name, routing_key=event_nac)
 channel.queue_bind(exchange='topics', queue=queue_name, routing_key=request_database)
 channel.queue_bind(exchange='topics', queue=queue_name, routing_key=data_response)
-channel.queue_bind(exchange='topics', queue=queue_name, routing_key=access_response)
-channel.queue_bind(exchange='topics', queue=queue_name, routing_key=weather)
+channel.queue_bind(exchange='topics', queue=queue_name, routing_key=device_found)
+channel.queue_bind(exchange='topics', queue=queue_name, routing_key=auth_response)
 
 print("Beginning Subscribe")
 print("Waiting for notifications")
@@ -51,13 +55,13 @@ def callback(ch, method, properties, body):
     count = count + 1
     print("Publishing " + count)
     text = text_to_send + ' ' + str(count)
+    channel.basic_publish(exchange='topics', routing_key=status_update, body=text)
+    time.sleep(5)
+    channel.basic_publish(exchange='topics', routing_key=auth_request, body=text)
+    time.sleep(5)
     channel.basic_publish(exchange='topics', routing_key=request_image, body=text)
     time.sleep(0.5)
     channel.basic_publish(exchange='topics', routing_key=request_data, body=text)
-    time.sleep(0.5)
-    channel.basic_publish(exchange='topics', routing_key=request_access, body=text)
-    time.sleep(0.5)
-    channel.basic_publish(exchange='topics', routing_key=request_weather, body=text)
     time.sleep(0.5)
     channel.basic_publish(exchange='topics', routing_key=data_info, body=text)
     
