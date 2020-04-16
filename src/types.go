@@ -1,45 +1,57 @@
 package main
 
 type ConfigTypes struct {
-	EmailSettings struct {
-		Email    string `yaml:"email"`
-		Password string `yaml:"password"`
-		Name     string `yaml:"name"`
-		To_email string `yaml:"to_email"`
-	} `yaml:"email_settings"`
-	MessageSettings struct {
-		Sid      string `yaml:"sid"`
-		Token    string `yaml:"token"`
-		From_num string `yaml:"from_num"`
-		To_num   string `yaml:"to_num"`
-	} `yaml:"message_settings"`
+	Settings struct {
+		Code    string `yaml:"code"`
+	} `yaml:"settings"`
 }
 
-type FailureMessage struct {
+type FailureNetwork struct {
 	Time         string `json:"time"`
 	Failure_type string `json:"type_of_failure"`
 }
 
-type MotionDetected struct {
-	File string `json:"file"`
-	Time string `json:"time"`
+type RequestImage struct {
+	Request_id string `json:"request_id"`
+	Time_from string `json:"time_from"`
+	Time_to string `json:"time_to"`
 }
 
-type MonitorState struct {
-	State bool
+type RequestData struct {
+	Request_id string `json:"request_id"`
+	Time_from string `json:"time_from"`
+	Time_to string `json:"time_to"`
+	Type string `json:"type"`
 }
 
-type RequestPower struct {
-	Power     string `json:"power"`
-	Severity  int    `json:"severity"`
-	Component string `json:"component"`
+type RequestDatabase struct {
+	Request_id string `json:"request_id"`
+	Time_from string `json:"time_from"`
+	Time_to string `json:"time_to"`
+	Type string `json:"type"`
 }
 
-type EventFH struct {
+type DataInfo struct {
+	Id int `json:"id"`
+    Message string `json:"message"`
+	Time string `json:"Time"`
+}
+
+type StatusUpdate struct {
+    Cpu_usage int `json:"cpu_usage"`
+    Memory_used int `json:"memory_used"`
+    Images int `json:"images"`
+}
+
+type RequestAccess struct {
+	Id int `json:"id"`
+	Pin int `json:"pin"`
+}
+
+type EventNAC struct {
 	Component    string
 	Message      string
 	Time         string
-	Severity     int
 }
 
 type MapMessage struct {
@@ -49,29 +61,28 @@ type MapMessage struct {
 	valid       bool
 }
 
-const FAILURE string = "Failure.*"
-const FAILURENETWORK string = "Failure.Network"     //Level 5
-const FAILUREDATABASE string = "Failure.Database"   //Level 4
-const FAILURECOMPONENT string = "Failure.Component" //Level 3
-const FAILUREACCESS string = "Failure.Access"       //Level 6
-const FAILURECAMERA string = "Failure.Camera" // Level 2
-const MOTIONDETECTED string = "Motion.Detected" //Level 7
+//Topics
+const REQUESTIMAGE string = "Request.Image"
+const REQUESTDATA string = "Request.Data"
+const AUTHENTICATIONREQUEST string = "Authentication.Request"
+const DATAINFO string = "Data.Info"
+const STATUSUPDATE string = "Status.Update"
+const REQUESTACCESS string = "Request.Access"
+//
+const FAILURENETWORK string = "Failure.Network"
+const EVENTNAC string = "Event.NAC"
+const REQUESTDATABASE string = "Request.Database"
+const DATARESPONSE string = "Data.Response"
+const DEVICEFOUND string = "Device.Found"
+const AUTHENTICATIONRESPONSE string = "Authentication.Response"
+const ACCESSRESPONSE string = "Access.Response"
 
-const MONITORSTATE string = "Monitor.State"
-const REQUESTPOWER string = "Request.Power"
-const EVENTFH string = "Event.FH"
 const EXCHANGENAME string = "topics"
 const EXCHANGETYPE string = "topic"
 const TIMEFORMAT string = "20060102150405"
-const CAMERAMONITOR string = "CM"
-const COMPONENT string = "FH"
-const UPDATESTATE string = "Monitoring state changed"
-const SERVERERROR string = "Server is failing to send"
-const MOTIONMESSAGE string = "There was movement, check the image"
-const STATEUPDATESEVERITY int = 2
-const SERVERSEVERITY int = 4
-const FAILURECONVERT string = "Failed to convert"
+const COMPONENT string = "NAC"
 const FAILUREPUBLISH string = "Failed to publish"
+const SERVERERROR string = "Server is failing to send"
 
 var SubscribedMessagesMap map[uint32]*MapMessage
 var key_id uint32 = 0

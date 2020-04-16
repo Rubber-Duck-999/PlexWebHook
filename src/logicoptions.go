@@ -9,7 +9,7 @@ import (
 func messageFailure(issue bool) string {
 	fail := ""
 	if issue {
-		fail = PublishEventFH(COMPONENT, SERVERERROR, getTime())
+		fail = PublishEventNAC(COMPONENT, SERVERERROR, getTime())
 	}
 	return fail
 }

@@ -30,5 +30,5 @@ func main() {
 		log.Error("File doesn't exist")
 		os.Exit(2)
 	}
-	log.Trace(data.EmailSettings.Email)
+	log.Trace(data.Settings.Code)
 }

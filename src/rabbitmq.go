@@ -62,10 +62,13 @@ func Subscribe() {
 	log.Trace("Beginning rabbitmq initialisation")
 	log.Warn("Rabbitmq error:", init_err)
 	if init_err == nil {
-		var topics = [3]string{
-			FAILURE,
-			MOTIONDETECTED,
-			MONITORSTATE,
+		var topics = [6]string{
+			REQUESTIMAGE,
+			REQUESTDATA,
+			AUTHENTICATIONREQUEST,
+			DATAINFO,
+			STATUSUPDATE,
+			REQUESTACCESS,
 		}
 
 		err := ch.ExchangeDeclare(
@@ -132,53 +135,26 @@ func Subscribe() {
 	}
 }
 
-func PublishRequestPower(this_power string, this_severity int, this_component string) string {
-	failure := ""
-	requestPower, err := json.Marshal(&RequestPower{
-		Power:     this_power,
-		Severity:  this_severity,
-		Component: this_component})
-	failOnError(err, "Failed to convert RequestPower")
-	log.Debug(string(requestPower))
-
-	if err == nil {
-		err = ch.Publish(
-			EXCHANGENAME, // exchange
-			REQUESTPOWER, // routing key
-			false,        // mandatory
-			false,        // immediate
-			amqp.Publishing{
-				ContentType: "application/json",
-				Body:        []byte(requestPower),
-			})
-		if err != nil {
-			failOnError(err, "Failed to publish RequestPower topic")
-			failure = FAILUREPUBLISH
-		}
-	}
-	return failure
-}
-
-func PublishEventFH(component string, message string, time string) string {
+func PublishEventNAC(component string, message string, time string) string {
 	failure := ""
 
-	eventFH, err := json.Marshal(&EventFH{
+	eventNAC, err := json.Marshal(&EventNAC{
 		Component:    component,
 		Message:      message,
 		Time:         time})
 	if err != nil {
-		failure = "Failed to convert EventFH"
+		failure = "Failed to convert EventNAC"
 	} else {
 		if init_err == nil {
-			log.Debug(string(eventFH))
+			log.Debug(string(eventNAC))
 			err = ch.Publish(
 				EXCHANGENAME, // exchange
-				EVENTFH,      // routing key
+				EVENTNAC,      // routing key
 				false,        // mandatory
 				false,        // immediate
 				amqp.Publishing{
 					ContentType: "application/json",
-					Body:        []byte(eventFH),
+					Body:        []byte(eventNAC),
 				})
 			if err != nil {
 				log.Fatal(err)

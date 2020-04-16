@@ -50,23 +50,12 @@ func TestLogicValid(t *testing.T) {
 	messages("Event.DBM", value)
 	if SubscribedMessagesMap[2].valid == false {
 		t.Error("Failure")
-	} else if SubscribedMessagesMap[2].routing_key == EVENTFH {
+	} else if SubscribedMessagesMap[2].routing_key == EVENTNAC {
 		t.Log(SubscribedMessagesMap[2].routing_key)
 		t.Error("Failure")
 	}
 }
 
-func TestLogicRequestPower(t *testing.T) {
-	value := "{ 'time': 12:00:34, 'type': 'Camera', 'severity': 3 }"
-	messages("Event.FH", value)
-	checkState()
-	if SubscribedMessagesMap[3].valid == true {
-		t.Error("Failure")
-	} else if SubscribedMessagesMap[2].routing_key == EVENTFH {
-		t.Log(SubscribedMessagesMap[2].routing_key)
-		t.Error("Failure")
-	}
-}
 
 func TestGetTime(t *testing.T) {
 	time := getTime()
@@ -82,28 +71,11 @@ func TestGetTimeFail(t *testing.T) {
 	}
 }
 
-func TestEventFH(t *testing.T) {
-	valid := PublishEventFH(COMPONENT, UPDATESTATEERROR, getTime(), STATEUPDATESEVERITY)
+func TestEventNAC(t *testing.T) {
+	valid := PublishEventNAC (COMPONENT, UPDATESTATEERROR, getTime())
 	if valid != "" {
 		t.Error("Failure")
 	}
 }
 
-func TestEmailSettings(t *testing.T) {
-	shutdown_valid := SetEmailSettings("email_to", "password", "from_name", "to_email")
-	if shutdown_valid {
-		t.Error("Failure")
-	}
-}
-
-func TestIssueNotice(t *testing.T) {
-	value := "{ 'severity': 1, 'component': 'CM', 'action': null }"
-	messages("Issue.Notice", value)
-	if SubscribedMessagesMap[4].valid == false {
-		t.Error("Failure")
-	} else if SubscribedMessagesMap[4].routing_key == EVENTFH {
-		t.Log(SubscribedMessagesMap[4].routing_key)
-		t.Error("Failure")
-	}
-}
 
