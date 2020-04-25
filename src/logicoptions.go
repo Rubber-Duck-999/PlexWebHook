@@ -1,7 +1,7 @@
 package main
 
 import (
-	//"encoding/json"
+	"encoding/json"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -20,6 +20,27 @@ func checkState() {
 			log.Debug("Message id is: ", message_id)
 			log.Debug("Message routing key is: ", SubscribedMessagesMap[message_id].routing_key)
 			switch {
+			case SubscribedMessagesMap[message_id].routing_key == REQUESTACCESS:
+				var message RequestAccess
+				json.Unmarshal([]byte(SubscribedMessagesMap[message_id].message), &message)
+				var result string
+				if message.Pin == pinCode {
+					log.Debug("Pins match")
+					result = ACCESSPASS
+				} else {
+					result = ACCESSFAIL
+				}
+				valid := PublishAccessResponse(message.Id, result)
+				if valid != "" {
+					SubscribedMessagesMap[message_id].valid = false
+					log.Warn("Failed to publish")
+				} else {
+					log.Debug("Published Access Response")
+				}
+
+			case SubscribedMessagesMap[message_id].routing_key == DATAINFO:
+				log.Warn("Received a data info topic")
+
 			default:
 				log.Warn("We were not expecting this message unvalidating: ",
 					SubscribedMessagesMap[message_id].routing_key)

@@ -3,6 +3,7 @@ package main
 type ConfigTypes struct {
 	Settings struct {
 		Code    string `yaml:"code"`
+		Default_Pin int `yaml:"Pin"`
 	} `yaml:"settings"`
 }
 
@@ -25,7 +26,7 @@ type RequestData struct {
 }
 
 type RequestDatabase struct {
-	Request_id string `json:"request_id"`
+	Request_id int `json:"request_id"`
 	Time_from string `json:"time_from"`
 	Time_to string `json:"time_to"`
 	Type string `json:"type"`
@@ -37,10 +38,15 @@ type DataInfo struct {
 	Time string `json:"Time"`
 }
 
-type StatusUpdate struct {
-    Cpu_usage int `json:"cpu_usage"`
-    Memory_used int `json:"memory_used"`
-    Images int `json:"images"`
+type DeviceFound struct {
+	Device_name string `json:"name"`
+	Ip_address string `json:"address"`
+	Mac string `json:"mac"`
+}
+
+type AccessResponse struct {
+	Id int `json:"id"`
+	Result string `json:"result"`
 }
 
 type RequestAccess struct {
@@ -48,10 +54,16 @@ type RequestAccess struct {
 	Pin int `json:"pin"`
 }
 
+type UnauthorisedConnection struct {
+	Mac string `json:"mac"`
+	Time string `json:"time"`
+	Alive bool `json:"alive"`
+}
+
 type EventNAC struct {
-	Component    string
-	Message      string
-	Time         string
+	Component    string `json:"Component"`
+	Message      string `json:"Message"`
+	Time         string `json:"Time"`
 }
 
 type MapMessage struct {
@@ -62,11 +74,9 @@ type MapMessage struct {
 }
 
 //Topics
-const REQUESTIMAGE string = "Request.Image"
 const REQUESTDATA string = "Request.Data"
 const AUTHENTICATIONREQUEST string = "Authentication.Request"
 const DATAINFO string = "Data.Info"
-const STATUSUPDATE string = "Status.Update"
 const REQUESTACCESS string = "Request.Access"
 //
 const FAILURENETWORK string = "Failure.Network"
@@ -76,7 +86,10 @@ const DATARESPONSE string = "Data.Response"
 const DEVICEFOUND string = "Device.Found"
 const AUTHENTICATIONRESPONSE string = "Authentication.Response"
 const ACCESSRESPONSE string = "Access.Response"
-
+const UNAUTHORISEDCONNECTION string = "Unauthorised.Connection"
+//
+const ACCESSFAIL string = "FAIL"
+const ACCESSPASS string = "PASS"
 const EXCHANGENAME string = "topics"
 const EXCHANGETYPE string = "topic"
 const TIMEFORMAT string = "20060102150405"

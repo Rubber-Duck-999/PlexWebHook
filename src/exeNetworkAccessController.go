@@ -26,6 +26,9 @@ func main() {
 	var data ConfigTypes
 	if Exists(file) {
 		GetData(&data, file)
+		SetCodes(data.Settings.Code,
+			data.Settings.Default_Pin)
+		Subscribe()
 	} else {
 		log.Error("File doesn't exist")
 		os.Exit(2)

@@ -11,6 +11,8 @@ import (
 var conn *amqp.Connection
 var ch *amqp.Channel
 var init_err error
+var password string
+var pinCode int
 
 func init() {
 	log.Trace("Initialised rabbitmq package")
@@ -19,6 +21,11 @@ func init() {
 
 	ch, init_err = conn.Channel()
 	failOnError(init_err, "Failed to open a channel")
+}
+
+func SetCodes(pass string, pin int) {
+	password = pass
+	pinCode = pin 
 }
 
 func failOnError(err error, msg string) {
@@ -59,15 +66,17 @@ func messages(routing_key string, value string) {
 }
 
 func Subscribe() {
+	conn, init_err = amqp.Dial("amqp://guest:" + password + "@localhost:5672/")
+	failOnError(init_err, "Failed to connect to RabbitMQ")
+
+	ch, init_err = conn.Channel()
+	failOnError(init_err, "Failed to open a channel")
+
 	log.Trace("Beginning rabbitmq initialisation")
 	log.Warn("Rabbitmq error:", init_err)
 	if init_err == nil {
-		var topics = [6]string{
-			REQUESTIMAGE,
-			REQUESTDATA,
-			AUTHENTICATIONREQUEST,
+		var topics = [2]string{
 			DATAINFO,
-			STATUSUPDATE,
 			REQUESTACCESS,
 		}
 
@@ -155,6 +164,158 @@ func PublishEventNAC(component string, message string, time string) string {
 				amqp.Publishing{
 					ContentType: "application/json",
 					Body:        []byte(eventNAC),
+				})
+			if err != nil {
+				log.Fatal(err)
+				failure = FAILUREPUBLISH
+			}
+		}
+	}
+	log.Warn(failure)
+	return failure
+}
+
+func PublishFailureNetwork(time string, reason string) string {
+	failure := ""
+
+	failureNetwork, err := json.Marshal(&FailureNetwork{
+		Time:         time,
+		Failure_type: reason})
+	if err != nil {
+		failure = "Failed to convert FailureNetwork"
+	} else {
+		if init_err == nil {
+			log.Debug(string(failureNetwork))
+			err = ch.Publish(
+				EXCHANGENAME, // exchange
+				FAILURENETWORK,  // routing key
+				false,        // mandatory
+				false,        // immediate
+				amqp.Publishing{
+					ContentType: "application/json",
+					Body:        []byte(failureNetwork),
+				})
+			if err != nil {
+				log.Fatal(err)
+				failure = FAILUREPUBLISH
+			}
+		}
+	}
+	log.Warn(failure)
+	return failure
+}
+
+func PublishRequestDatabase(id int, time_from string, time_to string, message string) string {
+	failure := ""
+
+	request, err := json.Marshal(&RequestDatabase{
+		Request_id: id,
+		Time_from:  time_from,
+		Time_to:    time_to,
+		Type:       message})
+	if err != nil {
+		failure = "Failed to convert RequestDatabase"
+	} else {
+		if init_err == nil {
+			log.Debug(string(request))
+			err = ch.Publish(
+				EXCHANGENAME, // exchange
+				REQUESTDATABASE,  // routing key
+				false,        // mandatory
+				false,        // immediate
+				amqp.Publishing{
+					ContentType: "application/json",
+					Body:        []byte(request),
+				})
+			if err != nil {
+				log.Fatal(err)
+				failure = FAILUREPUBLISH
+			}
+		}
+	}
+	log.Warn(failure)
+	return failure
+}
+
+func PublishDeviceFound(name string, address string, mac string) string {
+	failure := ""
+
+	device, err := json.Marshal(&DeviceFound{
+		Device_name: name,
+		Ip_address:  address,
+		Mac: mac})
+	if err != nil {
+		failure = "Failed to convert DeviceFound"
+	} else {
+		if init_err == nil {
+			log.Debug(string(device))
+			err = ch.Publish(
+				EXCHANGENAME, // exchange
+				DEVICEFOUND,  // routing key
+				false,        // mandatory
+				false,        // immediate
+				amqp.Publishing{
+					ContentType: "application/json",
+					Body:        []byte(device),
+				})
+			if err != nil {
+				log.Fatal(err)
+				failure = FAILUREPUBLISH
+			}
+		}
+	}
+	log.Warn(failure)
+	return failure
+}
+
+func PublishAccessResponse(id int, result string) string {
+	failure := ""
+
+	access, err := json.Marshal(&AccessResponse{
+		Id:     id,
+		Result: result})
+	if err != nil {
+		failure = "Failed to convert AccessResponse"
+	} else {
+		if init_err == nil {
+			err = ch.Publish(
+				EXCHANGENAME, // exchange
+				ACCESSRESPONSE,  // routing key
+				false,        // mandatory
+				false,        // immediate
+				amqp.Publishing{
+					ContentType: "application/json",
+					Body:        []byte(access),
+				})
+			if err != nil {
+				log.Fatal(err)
+				failure = FAILUREPUBLISH
+			}
+		}
+	}
+	log.Warn(failure)
+	return failure
+}
+
+func PublishUnauthorisedConnection(mac string, time string, alive bool) string {
+	failure := ""
+
+	connection, err := json.Marshal(&UnauthorisedConnection{
+		Mac:  mac,
+		Time: time,
+		Alive: alive})
+	if err != nil {
+		failure = "Failed to convert UnauthorisedConnection"
+	} else {
+		if init_err == nil {
+			err = ch.Publish(
+				EXCHANGENAME, // exchange
+				UNAUTHORISEDCONNECTION,  // routing key
+				false,        // mandatory
+				false,        // immediate
+				amqp.Publishing{
+					ContentType: "application/json",
+					Body:        []byte(connection),
 				})
 			if err != nil {
 				log.Fatal(err)
