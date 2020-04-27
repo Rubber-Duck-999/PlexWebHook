@@ -24,6 +24,7 @@ func checkState() {
 				var message RequestAccess
 				json.Unmarshal([]byte(SubscribedMessagesMap[message_id].message), &message)
 				var result string
+				log.Debug(message.Pin)
 				if message.Pin == pinCode {
 					log.Debug("Pins match")
 					result = ACCESSPASS
@@ -32,11 +33,11 @@ func checkState() {
 				}
 				valid := PublishAccessResponse(message.Id, result)
 				if valid != "" {
-					SubscribedMessagesMap[message_id].valid = false
 					log.Warn("Failed to publish")
 				} else {
 					log.Debug("Published Access Response")
 				}
+				SubscribedMessagesMap[message_id].valid = false
 
 			case SubscribedMessagesMap[message_id].routing_key == DATAINFO:
 				log.Warn("Received a data info topic")

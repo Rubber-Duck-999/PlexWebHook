@@ -153,6 +153,7 @@ func PublishEventNAC(component string, message string, time string) string {
 		Time:         time})
 	if err != nil {
 		failure = "Failed to convert EventNAC"
+		log.Warn(failure)
 	} else {
 		if init_err == nil {
 			log.Debug(string(eventNAC))
@@ -171,7 +172,6 @@ func PublishEventNAC(component string, message string, time string) string {
 			}
 		}
 	}
-	log.Warn(failure)
 	return failure
 }
 
@@ -183,6 +183,7 @@ func PublishFailureNetwork(time string, reason string) string {
 		Failure_type: reason})
 	if err != nil {
 		failure = "Failed to convert FailureNetwork"
+		log.Warn(failure)
 	} else {
 		if init_err == nil {
 			log.Debug(string(failureNetwork))
@@ -201,7 +202,6 @@ func PublishFailureNetwork(time string, reason string) string {
 			}
 		}
 	}
-	log.Warn(failure)
 	return failure
 }
 
@@ -215,6 +215,7 @@ func PublishRequestDatabase(id int, time_from string, time_to string, message st
 		Type:       message})
 	if err != nil {
 		failure = "Failed to convert RequestDatabase"
+		log.Warn(failure)
 	} else {
 		if init_err == nil {
 			log.Debug(string(request))
@@ -233,7 +234,6 @@ func PublishRequestDatabase(id int, time_from string, time_to string, message st
 			}
 		}
 	}
-	log.Warn(failure)
 	return failure
 }
 
@@ -246,6 +246,7 @@ func PublishDeviceFound(name string, address string, mac string) string {
 		Mac: mac})
 	if err != nil {
 		failure = "Failed to convert DeviceFound"
+		log.Warn(failure)
 	} else {
 		if init_err == nil {
 			log.Debug(string(device))
@@ -264,7 +265,6 @@ func PublishDeviceFound(name string, address string, mac string) string {
 			}
 		}
 	}
-	log.Warn(failure)
 	return failure
 }
 
@@ -276,6 +276,7 @@ func PublishAccessResponse(id int, result string) string {
 		Result: result})
 	if err != nil {
 		failure = "Failed to convert AccessResponse"
+		log.Warn(failure)
 	} else {
 		if init_err == nil {
 			err = ch.Publish(
@@ -293,7 +294,6 @@ func PublishAccessResponse(id int, result string) string {
 			}
 		}
 	}
-	log.Warn(failure)
 	return failure
 }
 
@@ -306,6 +306,7 @@ func PublishUnauthorisedConnection(mac string, time string, alive bool) string {
 		Alive: alive})
 	if err != nil {
 		failure = "Failed to convert UnauthorisedConnection"
+		log.Warn(failure)
 	} else {
 		if init_err == nil {
 			err = ch.Publish(
@@ -323,6 +324,5 @@ func PublishUnauthorisedConnection(mac string, time string, alive bool) string {
 			}
 		}
 	}
-	log.Warn(failure)
 	return failure
 }
