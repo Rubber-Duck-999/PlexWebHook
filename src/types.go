@@ -5,6 +5,21 @@ type ConfigTypes struct {
 		Code    string `yaml:"code"`
 		Default_Pin int `yaml:"Pin"`
 	} `yaml:"settings"`
+	Primary struct {
+		Name string `yaml:"name"`
+		Mac  string `yaml:"mac"`
+		Ip   string `yaml:"ip"`
+	} `yaml:"primary"`
+	Secondary struct {
+		Name string `yaml:"name"`
+		Mac  string `yaml:"mac"`
+		Ip   string `yaml:"ip"`
+	} `yaml:"secondary"`
+	Tertiary struct {
+		Name string `yaml:"name"`
+		Mac  string `yaml:"mac"`
+		Ip   string `yaml:"ip"`
+	} `yaml:"tertiary"`
 }
 
 type FailureNetwork struct {
@@ -40,8 +55,9 @@ type DataInfo struct {
 
 type DeviceFound struct {
 	Device_name string `json:"name"`
-	Ip_address string `json:"address"`
 	Mac string `json:"mac"`
+	Ip_address string `json:"address"`
+	Alive bool `json:"alive"`
 }
 
 type AccessResponse struct {
@@ -98,4 +114,6 @@ const FAILUREPUBLISH string = "Failed to publish"
 const SERVERERROR string = "Server is failing to send"
 
 var SubscribedMessagesMap map[uint32]*MapMessage
+var DevicesList map[uint32]*DeviceFound
 var key_id uint32 = 0
+var device_id uint32 = 0

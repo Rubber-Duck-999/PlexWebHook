@@ -73,7 +73,7 @@ func Subscribe() {
 	failOnError(init_err, "Failed to open a channel")
 
 	log.Trace("Beginning rabbitmq initialisation")
-	log.Warn("Rabbitmq error:", init_err)
+	failOnError(init_err, "Rabbitmq error")
 	if init_err == nil {
 		var topics = [2]string{
 			DATAINFO,

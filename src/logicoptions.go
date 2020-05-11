@@ -24,11 +24,11 @@ func checkState() {
 				var message RequestAccess
 				json.Unmarshal([]byte(SubscribedMessagesMap[message_id].message), &message)
 				var result string
-				log.Debug(message.Pin)
 				if message.Pin == pinCode {
 					log.Debug("Pins match")
 					result = ACCESSPASS
 				} else {
+					log.Debug("Pins do not match")
 					result = ACCESSFAIL
 				}
 				valid := PublishAccessResponse(message.Id, result)

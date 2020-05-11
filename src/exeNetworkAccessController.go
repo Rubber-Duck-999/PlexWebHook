@@ -28,6 +28,27 @@ func main() {
 		GetData(&data, file)
 		SetCodes(data.Settings.Code,
 			data.Settings.Default_Pin)
+		DevicesList = make(map[uint32]*DeviceFound)
+		device_id = 0
+		primary := DeviceFound{data.Primary.Name, 
+			data.Primary.Mac,
+			data.Primary.Ip,
+			false}
+		DevicesList[key_id] = &primary
+		device_id++
+		secondary := DeviceFound{data.Secondary.Name, 
+			data.Secondary.Mac,
+			data.Secondary.Ip,
+			false}
+		DevicesList[1] = &secondary
+		device_id++
+		tertiary := DeviceFound{data.Tertiary.Name, 
+			data.Tertiary.Mac,
+			data.Tertiary.Ip,
+			false}
+		DevicesList[2] = &tertiary
+		device_id++
+		checkDevices()
 		Subscribe()
 	} else {
 		log.Error("File doesn't exist")
