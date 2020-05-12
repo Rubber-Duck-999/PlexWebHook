@@ -50,12 +50,12 @@ func runARP() {
         mac := fields[3]
         if new_device == true {
             if mac == "<incomplete>" {
-                log.Warn("Cannot find MAC going to ping: ", ip)
+                log.Debug("Cannot find MAC going to ping: ", ip)
                 dst, dur, err := Ping(ip)
                 log.Trace("Ping ", dst, " : ", dur, " : ", err)
             } else {
-                log.Warn("Adding device: ", ip)
-                device := DeviceFound{"New", mac, ip, true}
+                log.Debug("Adding device: ", ip)
+                device := Device{"New", mac, ip, true, DISCOVERED}
                 DevicesList[device_id] = &device
                 device_id++
             }
@@ -125,6 +125,7 @@ func Ping(addr string) (*net.IPAddr, time.Duration, error) {
 }
 
 func checkDevices() {
+    DevicesList = make(map[uint32]*Device)
     for id := range DevicesList {
         dst, dur, err := Ping(DevicesList[id].Ip_address)
         if err != nil {
@@ -139,10 +140,20 @@ func checkDevices() {
     }
     runARP()
     runARP()
-    log.Debug("### Devices ###")
+    log.Warn("### Devices ###")
     for id := range DevicesList {
-        log.Debug("Device - ", DevicesList[id].Device_name, " : ",
+        log.Warn("Device - ", DevicesList[id].Device_name, " : ",
             DevicesList[id].Ip_address, " : ", 
-            DevicesList[id].Mac)
-    }
+            DevicesList[id].Mac, " : ",
+            DevicesList[id].Alive, " : ",
+            DevicesList[id].Allowed)
+        if DevicesList[id].Allowed == BLOCKED {
+            PublishDeviceFound(DevicesList[id].Device_name,
+                DevicesList[id].Ip_address)
+        } else if DevicesList[id].Allowed == DISCOVERED {
+
+        } else {
+
+        }
+    } 
 }

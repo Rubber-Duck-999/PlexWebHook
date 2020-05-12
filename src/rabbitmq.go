@@ -72,12 +72,13 @@ func Subscribe() {
 	ch, init_err = conn.Channel()
 	failOnError(init_err, "Failed to open a channel")
 
-	log.Trace("Beginning rabbitmq initialisation")
+	log.Warn("Beginning rabbitmq initialisation")
 	failOnError(init_err, "Rabbitmq error")
 	if init_err == nil {
-		var topics = [2]string{
+		var topics = [3]string{
 			DATAINFO,
 			REQUESTACCESS,
+			DEVICERESPONSE,
 		}
 
 		err := ch.ExchangeDeclare(
@@ -237,13 +238,12 @@ func PublishRequestDatabase(id int, time_from string, time_to string, message st
 	return failure
 }
 
-func PublishDeviceFound(name string, address string, mac string) string {
+func PublishDeviceFound(name string, address string) string {
 	failure := ""
 
-	device, err := json.Marshal(&DeviceFound{
+	device, err := json.Marshal(&DeviceFoundTopic{
 		Device_name: name,
-		Ip_address:  address,
-		Mac: mac})
+		Ip_address:  address})
 	if err != nil {
 		failure = "Failed to convert DeviceFound"
 		log.Warn(failure)
@@ -253,6 +253,38 @@ func PublishDeviceFound(name string, address string, mac string) string {
 			err = ch.Publish(
 				EXCHANGENAME, // exchange
 				DEVICEFOUND,  // routing key
+				false,        // mandatory
+				false,        // immediate
+				amqp.Publishing{
+					ContentType: "application/json",
+					Body:        []byte(device),
+				})
+			if err != nil {
+				log.Fatal(err)
+				failure = FAILUREPUBLISH
+			}
+		}
+	}
+	return failure
+}
+
+func PublishDeviceUpdate(name string, ip string, mac string, status int) string {
+	failure := ""
+
+	device, err := json.Marshal(&DeviceUpdate{
+		Name: name,
+		Ip: ip,
+		Mac: mac,
+		Status: status})
+	if err != nil {
+		failure = "Failed to convert DeviceUpdate"
+		log.Warn(failure)
+	} else {
+		if init_err == nil {
+			log.Debug(string(device))
+			err = ch.Publish(
+				EXCHANGENAME, // exchange
+				DEVICEUPDATE,  // routing key
 				false,        // mandatory
 				false,        // immediate
 				amqp.Publishing{

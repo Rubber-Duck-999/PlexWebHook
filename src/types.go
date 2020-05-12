@@ -5,21 +5,6 @@ type ConfigTypes struct {
 		Code    string `yaml:"code"`
 		Default_Pin int `yaml:"Pin"`
 	} `yaml:"settings"`
-	Primary struct {
-		Name string `yaml:"name"`
-		Mac  string `yaml:"mac"`
-		Ip   string `yaml:"ip"`
-	} `yaml:"primary"`
-	Secondary struct {
-		Name string `yaml:"name"`
-		Mac  string `yaml:"mac"`
-		Ip   string `yaml:"ip"`
-	} `yaml:"secondary"`
-	Tertiary struct {
-		Name string `yaml:"name"`
-		Mac  string `yaml:"mac"`
-		Ip   string `yaml:"ip"`
-	} `yaml:"tertiary"`
 }
 
 type FailureNetwork struct {
@@ -53,11 +38,17 @@ type DataInfo struct {
 	Time string `json:"Time"`
 }
 
-type DeviceFound struct {
+type Device struct {
 	Device_name string `json:"name"`
 	Mac string `json:"mac"`
 	Ip_address string `json:"address"`
 	Alive bool `json:"alive"`
+	Allowed int `json:"allowed"`
+}
+
+type DeviceFoundTopic struct {
+	Device_name string `json:"name"`
+	Ip_address string `json:"address"`
 }
 
 type AccessResponse struct {
@@ -89,11 +80,26 @@ type MapMessage struct {
 	valid       bool
 }
 
+type DeviceUpdate struct {
+	Name string `json:"Name"`
+	Ip string `json:"Ip"`
+	Mac string `json:"Mac"`
+	Status int `json:"Status"`
+}
+
+type DeviceRequest struct {
+	Name string `json:"name"`
+	Ip string `json:"ip"`
+	Mac string `json:"mac"`
+}
+
 //Topics
 const REQUESTDATA string = "Request.Data"
 const AUTHENTICATIONREQUEST string = "Authentication.Request"
 const DATAINFO string = "Data.Info"
 const REQUESTACCESS string = "Request.Access"
+const DEVICEADD string = "Device.Add"
+const DEVICERESPONSE string = "Device.Response"
 //
 const FAILURENETWORK string = "Failure.Network"
 const EVENTNAC string = "Event.NAC"
@@ -103,6 +109,8 @@ const DEVICEFOUND string = "Device.Found"
 const AUTHENTICATIONRESPONSE string = "Authentication.Response"
 const ACCESSRESPONSE string = "Access.Response"
 const UNAUTHORISEDCONNECTION string = "Unauthorised.Connection"
+const DEVICEREQUEST string = "Device.Request"
+const DEVICEUPDATE string = "Device.Update"
 //
 const ACCESSFAIL string = "FAIL"
 const ACCESSPASS string = "PASS"
@@ -112,8 +120,12 @@ const TIMEFORMAT string = "20060102150405"
 const COMPONENT string = "NAC"
 const FAILUREPUBLISH string = "Failed to publish"
 const SERVERERROR string = "Server is failing to send"
-
+//
+const ALLOWED int = 1
+const BLOCKED int = 2
+const DISCOVERED int = 3
+//
 var SubscribedMessagesMap map[uint32]*MapMessage
-var DevicesList map[uint32]*DeviceFound
+var DevicesList map[uint32]*Device
 var key_id uint32 = 0
 var device_id uint32 = 0
