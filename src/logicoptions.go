@@ -42,6 +42,34 @@ func checkState() {
 			case SubscribedMessagesMap[message_id].routing_key == DATAINFO:
 				log.Warn("Received a data info topic")
 
+			case SubscribedMessagesMap[message_id].routing_key == DEVICERESPONSE:
+				log.Warn("Received a device response topic")
+				var message DeviceResponse
+				json.Unmarshal([]byte(SubscribedMessagesMap[message_id].message), &message)
+				Request_id := message.Request_id
+				log.Warn("Device Request for ID: ", Request_id)
+				log.Debug("Allowed status: ", DevicesList[Request_id].Allowed, " changing to ",
+					message.Status)
+				if DevicesList[Request_id].Alive == true {
+					DevicesList[Request_id].Allowed = message.Status
+					DevicesList[Request_id].Device_name = message.Name
+					if DevicesList[Request_id].Allowed == BLOCKED  || 
+						DevicesList[Request_id].Allowed == UNKNOWN {
+						PublishDeviceFound(DevicesList[Request_id].Device_name,
+							DevicesList[Request_id].Ip_address,
+							DevicesList[Request_id].Allowed)
+					} else if DevicesList[Request_id].Allowed == DISCOVERED {
+						log.Error("DBM did not send us a correct status")
+					} else if DevicesList[Request_id].Allowed == ALLOWED {
+						log.Debug("Device is allowed")
+					} else {
+						log.Error("We shouldn't hit this error")
+						log.Error("Allowed status: ", DevicesList[Request_id].Allowed)
+					}
+				} else {
+					log.Error("We received a response for a non existent device")
+				}
+				SubscribedMessagesMap[message_id].valid = false
 			default:
 				log.Warn("We were not expecting this message unvalidating: ",
 					SubscribedMessagesMap[message_id].routing_key)

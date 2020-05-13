@@ -38,19 +38,6 @@ type DataInfo struct {
 	Time string `json:"Time"`
 }
 
-type Device struct {
-	Device_name string `json:"name"`
-	Mac string `json:"mac"`
-	Ip_address string `json:"address"`
-	Alive bool `json:"alive"`
-	Allowed int `json:"allowed"`
-}
-
-type DeviceFoundTopic struct {
-	Device_name string `json:"name"`
-	Ip_address string `json:"address"`
-}
-
 type AccessResponse struct {
 	Id int `json:"id"`
 	Result string `json:"result"`
@@ -80,17 +67,39 @@ type MapMessage struct {
 	valid       bool
 }
 
-type DeviceUpdate struct {
-	Name string `json:"Name"`
-	Ip string `json:"Ip"`
-	Mac string `json:"Mac"`
-	Status int `json:"Status"`
+type Device struct {
+	Device_name string `json:"name"`
+	Mac string `json:"mac"`
+	Ip_address string `json:"address"`
+	Alive bool `json:"alive"`
+	Allowed int `json:"allowed"`
 }
 
-type DeviceRequest struct {
+type DeviceFoundTopic struct {
+	Device_name string `json:"name"`
+	Ip_address string `json:"address"`
+	Status int `json:"status"`
+}
+
+type DeviceUpdate struct {
 	Name string `json:"name"`
 	Ip string `json:"ip"`
 	Mac string `json:"mac"`
+	Status int `json:"status"`
+}
+
+type DeviceRequest struct {
+	Request_id uint32 `json:"id"`
+	Ip string `json:"ip"`
+	Mac string `json:"mac"`
+}
+
+type DeviceResponse struct {
+	Request_id uint32 `json:"id"`
+	Name string `json:"name"`
+	Ip string `json:"ip"`
+	Mac string `json:"mac"`
+	Status int `json:"status"`
 }
 
 //Topics
@@ -124,6 +133,7 @@ const SERVERERROR string = "Server is failing to send"
 const ALLOWED int = 1
 const BLOCKED int = 2
 const DISCOVERED int = 3
+const UNKNOWN int = 4
 //
 var SubscribedMessagesMap map[uint32]*MapMessage
 var DevicesList map[uint32]*Device

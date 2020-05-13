@@ -18,6 +18,7 @@ import (
 
 const (
     ProtocolICMP = 1
+    network_scan_minute = 15
 )
 
 // Default to listen on all IPv4 interfaces
@@ -125,35 +126,57 @@ func Ping(addr string) (*net.IPAddr, time.Duration, error) {
 }
 
 func checkDevices() {
-    DevicesList = make(map[uint32]*Device)
-    for id := range DevicesList {
-        dst, dur, err := Ping(DevicesList[id].Ip_address)
-        if err != nil {
-            log.Error("Error in Ping on device: ", 
-                DevicesList[id].Device_name)
-            DevicesList[id].Alive = false
+    for {
+        t := time.Now()
+        min := t.Minute()
+        done := false
+        mod := min % network_scan_minute 
+        log.Trace("Minute is: ", min)
+        if mod == 0 && !done {
+            for id := range DevicesList {
+                dst, dur, err := Ping(DevicesList[id].Ip_address)
+                if err != nil {
+                    log.Error("Error in Ping on device: ", 
+                        DevicesList[id].Device_name)
+                    DevicesList[id].Alive = false
+                } else {
+                    log.Trace("Ping ", DevicesList[id].Device_name, " : ", 
+                        dst, " : ", dur)
+                    DevicesList[id].Alive = true
+                }
+            }
+            runARP()
+            runARP()
+            log.Warn("### Devices ###")
+            for id := range DevicesList {
+                log.Warn("Device - ", DevicesList[id].Device_name, " : ",
+                    DevicesList[id].Ip_address, " : ", 
+                    DevicesList[id].Mac, " : ",
+                    DevicesList[id].Alive, " : ",
+                    DevicesList[id].Allowed)
+                if DevicesList[id].Alive == true {
+                    if DevicesList[id].Allowed == BLOCKED {
+                        PublishDeviceFound(DevicesList[id].Device_name,
+                            DevicesList[id].Ip_address,
+                            DevicesList[id].Allowed)
+                    } else if DevicesList[id].Allowed == DISCOVERED {
+                        PublishDeviceRequest(id,
+                            DevicesList[id].Ip_address,
+                            DevicesList[id].Mac)
+                    } else if DevicesList[id].Allowed == UNKNOWN {
+                        PublishDeviceFound(DevicesList[id].Device_name,
+                            DevicesList[id].Ip_address,
+                            DevicesList[id].Allowed)
+                    } else {
+                        log.Debug("Device is Allowed so moving to next")
+                    }
+                }
+            }
+            done = true
+        } else if mod == 0 && done {
+            log.Debug("Not the right time to scan")
         } else {
-            log.Trace("Ping ", DevicesList[id].Device_name, " : ", 
-                dst, " : ", dur)
-            DevicesList[id].Alive = true
+            done = false
         }
     }
-    runARP()
-    runARP()
-    log.Warn("### Devices ###")
-    for id := range DevicesList {
-        log.Warn("Device - ", DevicesList[id].Device_name, " : ",
-            DevicesList[id].Ip_address, " : ", 
-            DevicesList[id].Mac, " : ",
-            DevicesList[id].Alive, " : ",
-            DevicesList[id].Allowed)
-        if DevicesList[id].Allowed == BLOCKED {
-            PublishDeviceFound(DevicesList[id].Device_name,
-                DevicesList[id].Ip_address)
-        } else if DevicesList[id].Allowed == DISCOVERED {
-
-        } else {
-
-        }
-    } 
 }
