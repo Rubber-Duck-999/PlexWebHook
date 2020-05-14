@@ -51,7 +51,13 @@ func checkState() {
 				log.Debug("Allowed status: ", DevicesList[Request_id].Allowed, " changing to ",
 					message.Status)
 				if DevicesList[Request_id].Alive == true {
-					DevicesList[Request_id].Allowed = message.Status
+					if message.Status == ALLOWED_STRING {
+						DevicesList[Request_id].Allowed = ALLOWED
+					} else if message.Status == BLOCKED_STRING {
+						DevicesList[Request_id].Allowed = BLOCKED
+					} else {
+						DevicesList[Request_id].Allowed = UNKNOWN
+					}
 					DevicesList[Request_id].Device_name = message.Name
 					if DevicesList[Request_id].Allowed == BLOCKED  || 
 						DevicesList[Request_id].Allowed == UNKNOWN {

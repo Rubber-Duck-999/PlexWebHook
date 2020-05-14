@@ -4,12 +4,15 @@ package main
 // All ye beware, there be dragons below...
 
 import (
+    "io/ioutil"
+    "net/http"
     "time"
     "os"
     "fmt"
 	"net"
 	"os/exec"
-	"strings"
+    "strings"
+    "strconv"
     "golang.org/x/net/icmp"
     "golang.org/x/net/ipv4"
 
@@ -51,16 +54,26 @@ func runARP() {
         mac := fields[3]
         if new_device == true {
             if mac == "<incomplete>" {
-                log.Debug("Cannot find MAC going to ping: ", ip)
+                log.Trace("Cannot find MAC going to ping: ", ip)
                 dst, dur, err := Ping(ip)
                 log.Trace("Ping ", dst, " : ", dur, " : ", err)
             } else {
                 log.Debug("Adding device: ", ip)
-                device := Device{"New", mac, ip, true, DISCOVERED}
-                DevicesList[device_id] = &device
-                device_id++
+                response, err := http.Get("https://api.macvendors.com/" + mac)
+                if err != nil {
+                    log.Error("The HTTP request failed with error \n", err)
+                } else {
+                    data, _ := ioutil.ReadAll(response.Body)
+                    log.Trace(response)
+                    log.Debug("Device is actually: ", string(data))
+                    device := Device{string(data), mac, ip, true, DISCOVERED}
+                    DevicesList[device_id] = &device
+                    device_id++
+                }
+                time.Sleep(1 * time.Second)
             }
         }
+        
     }
 }
 
@@ -126,26 +139,23 @@ func Ping(addr string) (*net.IPAddr, time.Duration, error) {
 }
 
 func checkDevices() {
+    done := false
     for {
         t := time.Now()
         min := t.Minute()
-        done := false
         mod := min % network_scan_minute 
         log.Trace("Minute is: ", min)
-        if mod == 0 && !done {
-            for id := range DevicesList {
-                dst, dur, err := Ping(DevicesList[id].Ip_address)
+        if mod == 0 && done == false {
+            for addr := 0; addr < 50; addr++ {
+                s := strconv.Itoa(addr)
+                address:= START_ADDRESS + s
+                dst, dur, err := Ping(address)
                 if err != nil {
-                    log.Error("Error in Ping on device: ", 
-                        DevicesList[id].Device_name)
-                    DevicesList[id].Alive = false
+                    log.Trace("No reply")
                 } else {
-                    log.Trace("Ping ", DevicesList[id].Device_name, " : ", 
-                        dst, " : ", dur)
-                    DevicesList[id].Alive = true
+                    log.Debug("Ping ", dst, " : ", dur, " : ", err)
                 }
             }
-            runARP()
             runARP()
             log.Warn("### Devices ###")
             for id := range DevicesList {
@@ -161,7 +171,7 @@ func checkDevices() {
                             DevicesList[id].Allowed)
                     } else if DevicesList[id].Allowed == DISCOVERED {
                         PublishDeviceRequest(id,
-                            DevicesList[id].Ip_address,
+                            DevicesList[id].Device_name,
                             DevicesList[id].Mac)
                     } else if DevicesList[id].Allowed == UNKNOWN {
                         PublishDeviceFound(DevicesList[id].Device_name,
@@ -172,9 +182,10 @@ func checkDevices() {
                     }
                 }
             }
+            log.Debug("### End ###")
             done = true
         } else if mod == 0 && done {
-            log.Debug("Not the right time to scan")
+            log.Trace("Not the right time to scan")
         } else {
             done = false
         }

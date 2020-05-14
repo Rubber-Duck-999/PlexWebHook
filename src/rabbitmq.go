@@ -273,19 +273,19 @@ func PublishDeviceFound(name string, address string, status int) string {
 	return failure
 }
 
-func PublishDeviceRequest(id uint32, ip string, mac string) string {
+func PublishDeviceRequest(id uint32, name string, mac string) string {
 	failure := ""
 
 	device, err := json.Marshal(&DeviceRequest{
 		Request_id: id,
-		Ip: ip,
+		Name: name,
 		Mac: mac})
 	if err != nil {
 		failure = "Failed to convert DeviceRequest"
 		log.Warn(failure)
 	} else {
 		if init_err == nil {
-			log.Debug(string(device))
+			log.Trace(string(device))
 			err = ch.Publish(
 				EXCHANGENAME, // exchange
 				DEVICEREQUEST,  // routing key

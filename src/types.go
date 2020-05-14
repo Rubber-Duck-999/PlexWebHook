@@ -60,6 +60,10 @@ type EventNAC struct {
 	Time         string `json:"Time"`
 }
 
+type ApiResponse struct {
+	Vendor string `json:"Vendor"`
+}
+
 type MapMessage struct {
 	message     string
 	routing_key string
@@ -90,16 +94,15 @@ type DeviceUpdate struct {
 
 type DeviceRequest struct {
 	Request_id uint32 `json:"id"`
-	Ip string `json:"ip"`
+	Name string `json:"name"`
 	Mac string `json:"mac"`
 }
 
 type DeviceResponse struct {
 	Request_id uint32 `json:"id"`
 	Name string `json:"name"`
-	Ip string `json:"ip"`
 	Mac string `json:"mac"`
-	Status int `json:"status"`
+	Status string `json:"status"`
 }
 
 //Topics
@@ -134,6 +137,11 @@ const ALLOWED int = 1
 const BLOCKED int = 2
 const DISCOVERED int = 3
 const UNKNOWN int = 4
+const ALLOWED_STRING string = "ALLOWED"
+const BLOCKED_STRING string = "BLOCKED"
+const UNKNOWN_STRING string = "UNKNOWN"
+//
+const START_ADDRESS string = "192.168.0."
 //
 var SubscribedMessagesMap map[uint32]*MapMessage
 var DevicesList map[uint32]*Device
