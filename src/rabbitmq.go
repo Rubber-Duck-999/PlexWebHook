@@ -304,14 +304,14 @@ func PublishDeviceRequest(id uint32, name string, mac string) string {
 	return failure
 }
 
-func PublishDeviceUpdate(name string, ip string, mac string, status int) string {
+func PublishDeviceUpdate(name string, mac string, status int, state string) string {
 	failure := ""
 
 	device, err := json.Marshal(&DeviceUpdate{
 		Name: name,
-		Ip: ip,
 		Mac: mac,
-		Status: status})
+		Status: status,
+		State: state})
 	if err != nil {
 		failure = "Failed to convert DeviceUpdate"
 		log.Warn(failure)

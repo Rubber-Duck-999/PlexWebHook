@@ -87,9 +87,9 @@ type DeviceFoundTopic struct {
 
 type DeviceUpdate struct {
 	Name string `json:"name"`
-	Ip string `json:"ip"`
 	Mac string `json:"mac"`
 	Status int `json:"status"`
+	State string `json:"state"`
 }
 
 type DeviceRequest struct {
