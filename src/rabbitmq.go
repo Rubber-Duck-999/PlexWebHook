@@ -23,9 +23,8 @@ func init() {
 	failOnError(init_err, "Failed to open a channel")
 }
 
-func SetCodes(pass string, pin int) {
+func SetCodes(pass string) {
 	password = pass
-	pinCode = pin 
 }
 
 func failOnError(err error, msg string) {
@@ -77,9 +76,8 @@ func Subscribe() {
 
 	DevicesList = make(map[uint32]*Device)
 	if init_err == nil {
-		var topics = [3]string{
+		var topics = [2]string{
 			DATAINFO,
-			REQUESTACCESS,
 			DEVICERESPONSE,
 		}
 
@@ -326,35 +324,6 @@ func PublishDeviceUpdate(name string, mac string, status int, state string) stri
 				amqp.Publishing{
 					ContentType: "application/json",
 					Body:        []byte(device),
-				})
-			if err != nil {
-				log.Fatal(err)
-				failure = FAILUREPUBLISH
-			}
-		}
-	}
-	return failure
-}
-
-func PublishAccessResponse(id int, result string) string {
-	failure := ""
-
-	access, err := json.Marshal(&AccessResponse{
-		Id:     id,
-		Result: result})
-	if err != nil {
-		failure = "Failed to convert AccessResponse"
-		log.Warn(failure)
-	} else {
-		if init_err == nil {
-			err = ch.Publish(
-				EXCHANGENAME, // exchange
-				ACCESSRESPONSE,  // routing key
-				false,        // mandatory
-				false,        // immediate
-				amqp.Publishing{
-					ContentType: "application/json",
-					Body:        []byte(access),
 				})
 			if err != nil {
 				log.Fatal(err)

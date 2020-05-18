@@ -3,7 +3,6 @@ package main
 type ConfigTypes struct {
 	Settings struct {
 		Code    string `yaml:"code"`
-		Default_Pin int `yaml:"Pin"`
 	} `yaml:"settings"`
 }
 
@@ -36,16 +35,6 @@ type DataInfo struct {
 	Id int `json:"id"`
     Message string `json:"message"`
 	Time string `json:"Time"`
-}
-
-type AccessResponse struct {
-	Id int `json:"id"`
-	Result string `json:"result"`
-}
-
-type RequestAccess struct {
-	Id int `json:"id"`
-	Pin int `json:"pin"`
 }
 
 type UnauthorisedConnection struct {
