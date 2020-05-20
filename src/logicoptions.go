@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -12,6 +13,17 @@ func messageFailure(issue bool) string {
 		fail = PublishEventNAC(COMPONENT, SERVERERROR, getTime())
 	}
 	return fail
+}
+
+func checkDay(daily int) int {
+	_, _, current_day := time.Now().Date()
+	if current_day == day {
+		daily++
+		return daily
+	} else {
+		_, _, day = time.Now().Date()
+		return 0
+	}
 }
 
 func checkState() {
@@ -34,10 +46,13 @@ func checkState() {
 				if DevicesList[Request_id].Alive == true {
 					if message.Status == ALLOWED_STRING {
 						DevicesList[Request_id].Allowed = ALLOWED
+						_statusNAC.DailyAllowedDevices = checkDay(_statusNAC.DailyAllowedDevices)
 					} else if message.Status == BLOCKED_STRING {
 						DevicesList[Request_id].Allowed = BLOCKED
+						_statusNAC.DailyBlockedDevices = checkDay(_statusNAC.DailyBlockedDevices)
 					} else {
 						DevicesList[Request_id].Allowed = UNKNOWN
+						_statusNAC.DailyUnknownDevices = checkDay(_statusNAC.DailyUnknownDevices)
 					}
 					DevicesList[Request_id].Device_name = message.Name
 					if DevicesList[Request_id].Allowed == BLOCKED  || 

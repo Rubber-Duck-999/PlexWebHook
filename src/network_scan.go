@@ -26,6 +26,16 @@ const (
 
 // Default to listen on all IPv4 interfaces
 var ListenAddr = "0.0.0.0"
+var _statusNAC StatusNAC
+
+func init() {
+    _statusNAC = StatusNAC{
+		DevicesActive: 0,
+		DailyBlockedDevices: 0,
+		DailyUnknownDevices: 0,
+		DailyAllowedDevices: 0,
+		TimeEscConnected: "N/A"}
+}
 
 func runARP() {
     log.Debug("Running ARP")
@@ -158,6 +168,7 @@ func checkDevices() {
             }
             runARP()
             log.Warn("### Devices ###")
+            _statusNAC.DevicesActive = 0
             for id := range DevicesList {
                 log.Warn("Device - ", DevicesList[id].Device_name, " : ",
                     DevicesList[id].Ip_address, " : ", 
@@ -181,8 +192,11 @@ func checkDevices() {
                         log.Debug("Device is Allowed so moving to next")
                     }
                 }
+                _statusNAC.DevicesActive++
             }
             log.Debug("### End ###")
+            log.Debug("Starting Status NAC publish")
+            PublishStatusNAC()
             done = true
         } else if mod == 0 && done {
             log.Trace("Not the right time to scan")

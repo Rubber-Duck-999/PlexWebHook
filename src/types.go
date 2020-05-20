@@ -94,11 +94,18 @@ type DeviceResponse struct {
 	Status string `json:"status"`
 }
 
+type StatusNAC struct {
+	DevicesActive int
+	DailyBlockedDevices int
+	DailyUnknownDevices int
+	DailyAllowedDevices int
+	TimeEscConnected string
+}
+
 //Topics
 const REQUESTDATA string = "Request.Data"
 const AUTHENTICATIONREQUEST string = "Authentication.Request"
 const DATAINFO string = "Data.Info"
-const REQUESTACCESS string = "Request.Access"
 const DEVICEADD string = "Device.Add"
 const DEVICERESPONSE string = "Device.Response"
 //
@@ -108,10 +115,10 @@ const REQUESTDATABASE string = "Request.Database"
 const DATARESPONSE string = "Data.Response"
 const DEVICEFOUND string = "Device.Found"
 const AUTHENTICATIONRESPONSE string = "Authentication.Response"
-const ACCESSRESPONSE string = "Access.Response"
 const UNAUTHORISEDCONNECTION string = "Unauthorised.Connection"
 const DEVICEREQUEST string = "Device.Request"
 const DEVICEUPDATE string = "Device.Update"
+const STATUSNAC string = "Status.NAC"
 //
 const ACCESSFAIL string = "FAIL"
 const ACCESSPASS string = "PASS"

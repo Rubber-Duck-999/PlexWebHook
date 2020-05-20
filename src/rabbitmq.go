@@ -13,6 +13,7 @@ var ch *amqp.Channel
 var init_err error
 var password string
 var pinCode int
+var day int
 
 func init() {
 	log.Trace("Initialised rabbitmq package")
@@ -21,6 +22,8 @@ func init() {
 
 	ch, init_err = conn.Channel()
 	failOnError(init_err, "Failed to open a channel")
+	_, _, day := time.Now().Date()
+	log.Debug("Day currently: ", day)
 }
 
 func SetCodes(pass string) {
@@ -354,6 +357,33 @@ func PublishUnauthorisedConnection(mac string, time string, alive bool) string {
 				amqp.Publishing{
 					ContentType: "application/json",
 					Body:        []byte(connection),
+				})
+			if err != nil {
+				log.Fatal(err)
+				failure = FAILUREPUBLISH
+			}
+		}
+	}
+	return failure
+}
+
+func PublishStatusNAC() string {
+	failure := ""
+
+	converted, err := json.Marshal(&_statusNAC)
+	if err != nil {
+		failure = "Failed to convert StatusNAC"
+		log.Warn(failure)
+	} else {
+		if init_err == nil {
+			err = ch.Publish(
+				EXCHANGENAME, // exchange
+				STATUSNAC,  // routing key
+				false,        // mandatory
+				false,        // immediate
+				amqp.Publishing{
+					ContentType: "application/json",
+					Body:        []byte(converted),
 				})
 			if err != nil {
 				log.Fatal(err)
