@@ -95,11 +95,11 @@ type DeviceResponse struct {
 }
 
 type StatusNAC struct {
-	DevicesActive int
-	DailyBlockedDevices int
-	DailyUnknownDevices int
-	DailyAllowedDevices int
-	TimeEscConnected string
+	DevicesActive int `json:"devices_active"`
+	DailyBlockedDevices int `json:"blocked"`
+	DailyUnknownDevices int `json:"unknown"`
+	DailyAllowedDevices int `json:"allowed"`
+	TimeEscConnected string `json:"time"`
 }
 
 //Topics
