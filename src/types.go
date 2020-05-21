@@ -44,9 +44,9 @@ type UnauthorisedConnection struct {
 }
 
 type EventNAC struct {
-	Component    string `json:"Component"`
-	Message      string `json:"Message"`
-	Time         string `json:"Time"`
+	Component    string `json:"component"`
+	Message      string `json:"message"`
+	Time         string `json:"time"`
 }
 
 type ApiResponse struct {
