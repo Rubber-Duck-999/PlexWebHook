@@ -21,7 +21,6 @@ import (
 
 const (
     ProtocolICMP = 1
-    network_scan_minute = 3
 )
 
 // Default to listen on all IPv4 interfaces
@@ -151,11 +150,7 @@ func Ping(addr string) (*net.IPAddr, time.Duration, error) {
 func checkDevices() {
     done := false
     for {
-        t := time.Now()
-        min := t.Minute()
-        mod := min % network_scan_minute 
-        log.Trace("Minute is: ", min)
-        if mod == 0 && done == false {
+        if done == false {
             for addr := 0; addr < 50; addr++ {
                 s := strconv.Itoa(addr)
                 address:= START_ADDRESS + s
@@ -199,10 +194,9 @@ func checkDevices() {
             log.Debug("Current message : ", _statusNAC)
             PublishStatusNAC()
             done = true
-        } else if mod == 0 && done {
-            log.Trace("Not the right time to scan")
         } else {
             done = false
         }
+        time.Sleep(4 * time.Minute)
     }
 }
