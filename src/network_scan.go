@@ -124,7 +124,7 @@ func Ping(addr string) (*net.IPAddr, time.Duration, error) {
     }
 
     // Wait for a reply
-    reply := make([]byte, 1500)
+    reply := make([]byte, 3000)
     err = c.SetReadDeadline(time.Now().Add(10 * time.Second))
     if err != nil {
         return dst, 0, err
@@ -151,7 +151,7 @@ func checkDevices() {
     done := false
     for {
         if done == false {
-            for addr := 0; addr < 50; addr++ {
+            for addr := 0; addr < 32; addr++ {
                 s := strconv.Itoa(addr)
                 address:= START_ADDRESS + s
                 dst, dur, err := Ping(address)
@@ -197,6 +197,6 @@ func checkDevices() {
         } else {
             done = false
         }
-        time.Sleep(4 * time.Minute)
+        time.Sleep(2 * time.Minute)
     }
 }
