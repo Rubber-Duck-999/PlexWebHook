@@ -43,6 +43,7 @@ func checkState() {
 				log.Warn("Device Request for ID: ", Request_id)
 				log.Debug("Allowed status: ", DevicesList[Request_id].Allowed, " changing to ",
 					message.Status)
+				log.Warn("Device name is :", message.Name)
 				if DevicesList[Request_id].Alive == true {
 					if message.Status == ALLOWED_STRING {
 						DevicesList[Request_id].Allowed = ALLOWED

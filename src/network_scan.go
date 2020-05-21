@@ -21,7 +21,7 @@ import (
 
 const (
     ProtocolICMP = 1
-    network_scan_minute = 10
+    network_scan_minute = 3
 )
 
 // Default to listen on all IPv4 interfaces
@@ -156,7 +156,7 @@ func checkDevices() {
         mod := min % network_scan_minute 
         log.Trace("Minute is: ", min)
         if mod == 0 && done == false {
-            for addr := 0; addr < 255; addr++ {
+            for addr := 0; addr < 50; addr++ {
                 s := strconv.Itoa(addr)
                 address:= START_ADDRESS + s
                 dst, dur, err := Ping(address)
@@ -191,11 +191,12 @@ func checkDevices() {
                     } else {
                         log.Debug("Device is Allowed so moving to next")
                     }
+                    _statusNAC.DevicesActive++
                 }
-                _statusNAC.DevicesActive++
             }
             log.Debug("### End ###")
             log.Debug("Starting Status NAC publish")
+            log.Debug("Current message : ", _statusNAC)
             PublishStatusNAC()
             done = true
         } else if mod == 0 && done {
