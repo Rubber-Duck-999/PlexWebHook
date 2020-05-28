@@ -66,6 +66,7 @@ type Device struct {
 	Ip_address string `json:"address"`
 	Alive bool `json:"alive"`
 	Allowed int `json:"allowed"`
+	New bool `json:"new"`
 }
 
 type DeviceFoundTopic struct {

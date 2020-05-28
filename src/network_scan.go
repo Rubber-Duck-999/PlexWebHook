@@ -49,15 +49,18 @@ func runARP() {
 		ip := strings.Replace(fields[1], "(", "", -1)
         ip = strings.Replace(ip, ")", "", -1)
         new_device := true
+        mac := fields[3]     
         for id := range DevicesList {
-            if DevicesList[id].Ip_address == ip {
+            DevicesList[id].New = false
+            if DevicesList[id].Mac == mac {
                 log.Trace("Device found in Arp table")
                 DevicesList[id].Alive = true
-                new_device = false
+                DevicesList[id].Ip_address = ip
+            } else {
+                DevicesList[id].Alive = false              
             }
         }
-        mac := fields[3]
-        if new_device == true {
+        if new_device {
             if mac != "<incomplete>" {
                 log.Debug("Adding device ip: ", ip)
                 response, err := http.Get("https://api.macvendors.com/" + mac)
@@ -67,14 +70,13 @@ func runARP() {
                     data, _ := ioutil.ReadAll(response.Body)
                     log.Trace(response)
                     log.Debug("Vendor Name: ", string(data))
-                    device := Device{string(data), mac, ip, true, DISCOVERED}
+                    device := Device{string(data), mac, ip, true, DISCOVERED, true}
                     DevicesList[device_id] = &device
                     device_id++
                 }
                 time.Sleep(1 * time.Second)
             }
         }
-        
     }
 }
 
@@ -137,19 +139,11 @@ func checkDevices() {
                     DevicesList[id].Mac, " : ",
                     DevicesList[id].Alive, " : ",
                     DevicesList[id].Allowed)
-                if DevicesList[id].Alive == true {
-                    if DevicesList[id].Allowed == BLOCKED {
-                        PublishDeviceFound(DevicesList[id].Device_name,
-                            DevicesList[id].Ip_address,
-                            DevicesList[id].Allowed)
-                    } else if DevicesList[id].Allowed == DISCOVERED {
+                if DevicesList[id].Alive {
+                    if DevicesList[id].Allowed == DISCOVERED {
                         PublishDeviceRequest(id,
                             DevicesList[id].Device_name,
                             DevicesList[id].Mac)
-                    } else if DevicesList[id].Allowed == UNKNOWN {
-                        PublishDeviceFound(DevicesList[id].Device_name,
-                            DevicesList[id].Ip_address,
-                            DevicesList[id].Allowed)
                     } else {
                         log.Debug("Device is Allowed so moving to next")
                     }
