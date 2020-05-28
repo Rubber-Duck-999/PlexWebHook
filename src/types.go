@@ -135,6 +135,7 @@ const DISCOVERED int = 3
 const UNKNOWN int = 4
 const ALLOWED_STRING string = "ALLOWED"
 const BLOCKED_STRING string = "BLOCKED"
+const DISCOVERED_STRING string = "DISCOVERED"
 const UNKNOWN_STRING string = "UNKNOWN"
 //
 const START_ADDRESS string = "192.168.0."

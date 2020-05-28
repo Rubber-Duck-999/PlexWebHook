@@ -4,19 +4,15 @@ package main
 // All ye beware, there be dragons below...
 
 import (
+    "context"
     "io/ioutil"
     "net/http"
     "time"
-    "os"
-    "fmt"
-	"net"
 	"os/exec"
     "strings"
-    "strconv"
-    "golang.org/x/net/icmp"
-    "golang.org/x/net/ipv4"
 
     log "github.com/sirupsen/logrus"
+    "github.com/Ullaakut/nmap"
 )
 
 const (
@@ -37,7 +33,7 @@ func init() {
 }
 
 func runARP() {
-    log.Debug("Running ARP")
+    log.Debug("### Running ARP ###")
     data, err := exec.Command("arp", "-a").Output()
 	if err != nil {
 		log.Error(err)
@@ -55,26 +51,22 @@ func runARP() {
         new_device := true
         for id := range DevicesList {
             if DevicesList[id].Ip_address == ip {
-                log.Trace("Node found in Arp table")
+                log.Trace("Device found in Arp table")
                 DevicesList[id].Alive = true
                 new_device = false
             }
         }
         mac := fields[3]
         if new_device == true {
-            if mac == "<incomplete>" {
-                log.Trace("Cannot find MAC going to ping: ", ip)
-                dst, dur, err := Ping(ip)
-                log.Trace("Ping ", dst, " : ", dur, " : ", err)
-            } else {
-                log.Debug("Adding device: ", ip)
+            if mac != "<incomplete>" {
+                log.Debug("Adding device ip: ", ip)
                 response, err := http.Get("https://api.macvendors.com/" + mac)
                 if err != nil {
                     log.Error("The HTTP request failed with error \n", err)
                 } else {
                     data, _ := ioutil.ReadAll(response.Body)
                     log.Trace(response)
-                    log.Debug("Device is actually: ", string(data))
+                    log.Debug("Vendor Name: ", string(data))
                     device := Device{string(data), mac, ip, true, DISCOVERED}
                     DevicesList[device_id] = &device
                     device_id++
@@ -86,81 +78,56 @@ func runARP() {
     }
 }
 
-func Ping(addr string) (*net.IPAddr, time.Duration, error) {
-    // Start listening for icmp replies
-    c, err := icmp.ListenPacket("ip4:icmp", ListenAddr)
-    if err != nil {
-        return nil, 0, err
-    }
-    defer c.Close()
+func nmap_scan() {
+    ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+    defer cancel()
 
-    // Resolve any DNS (if used) and get the real IP of the target
-    dst, err := net.ResolveIPAddr("ip4", addr)
+    // Equivalent to `/usr/local/bin/nmap -p 80,443,843 google.com facebook.com youtube.com`,
+    // with a 2 minute timeout.
+    scanner, err := nmap.NewScanner(
+        nmap.WithTargets("192.168.0.0-255"),
+        nmap.WithPorts("80,443,843"),
+        nmap.WithContext(ctx),
+    )
     if err != nil {
-        panic(err)
-        return nil, 0, err
-    }
-
-    // Make a new ICMP message
-    m := icmp.Message{
-        Type: ipv4.ICMPTypeEcho, Code: 0,
-        Body: &icmp.Echo{
-            ID: os.Getpid() & 0xffff, Seq: 1,
-            Data: []byte(""),
-        },
-    }
-    b, err := m.Marshal(nil)
-    if err != nil {
-        return dst, 0, err
+        log.Error("Unable to create nmap scanner: ", err)
     }
 
-    // Send it
-    start := time.Now()
-    n, err := c.WriteTo(b, dst)
+    result, warnings, err := scanner.Run()
     if err != nil {
-        return dst, 0, err
-    } else if n != len(b) {
-        return dst, 0, fmt.Errorf("got %v; want %v", n, len(b))
+        log.Error("Unable to run nmap scan: ", err)
     }
 
-    // Wait for a reply
-    reply := make([]byte, 3000)
-    err = c.SetReadDeadline(time.Now().Add(10 * time.Second))
-    if err != nil {
-        return dst, 0, err
+    if warnings != nil {
+        log.Error("Warnings: ", warnings)
     }
-    n, peer, err := c.ReadFrom(reply)
-    if err != nil {
-        return dst, 0, err
-    }
-    duration := time.Since(start)
 
-    rm, err := icmp.ParseMessage(ProtocolICMP, reply[:n])
-    if err != nil {
-        return dst, 0, err
+    // Use the results to print an example output
+    for _, host := range result.Hosts {
+        if len(host.Ports) == 0 || len(host.Addresses) == 0 {
+            continue
+        }
+
+        log.Debug("Host: ", host.Addresses[0])
+
+        for _, port := range host.Ports {
+            if port.State.String() != "closed" {
+                log.Debug("# Port ID: ", port.ID)
+                log.Debug("# Protocol: ", port.Protocol)
+                log.Debug("# State: ", port.State)
+                log.Debug("# Service: ", port.Service.Name)
+            }
+        }
     }
-    switch rm.Type {
-    case ipv4.ICMPTypeEchoReply:
-        return dst, duration, nil
-    default:
-        return dst, 0, fmt.Errorf("got %+v from %v; want echo reply", rm, peer)
-    }
+
+    log.Debug("Nmap done: ", len(result.Hosts), " hosts up scanned in seconds ",  result.Stats.Finished.Elapsed)
 }
 
 func checkDevices() {
     done := false
     for {
         if done == false {
-            for addr := 0; addr < 32; addr++ {
-                s := strconv.Itoa(addr)
-                address:= START_ADDRESS + s
-                dst, dur, err := Ping(address)
-                if err != nil {
-                    log.Trace("No reply")
-                } else {
-                    log.Debug("Ping ", dst, " : ", dur, " : ", err)
-                }
-            }
+            nmap_scan()
             runARP()
             log.Warn("### Devices ###")
             _statusNAC.DevicesActive = 0
@@ -189,9 +156,10 @@ func checkDevices() {
                     _statusNAC.DevicesActive++
                 }
             }
-            log.Debug("### End ###")
+            log.Debug("### End of ARP ###")
             log.Debug("Starting Status NAC publish")
             log.Debug("Current message : ", _statusNAC)
+            log.Debug("### End of Status ###")
             PublishStatusNAC()
             done = true
         } else {

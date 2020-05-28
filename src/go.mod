@@ -3,6 +3,7 @@ module github.com/Rubber-Duck-99/exeNetworkAccessController
 go 1.13
 
 require (
+	github.com/Ullaakut/nmap v2.0.0+incompatible
 	github.com/akamensky/argparse v1.2.1
 	github.com/clarketm/json v1.14.1
 	github.com/scorredoira/email v0.0.0-20191107070024-dc7b732c55da

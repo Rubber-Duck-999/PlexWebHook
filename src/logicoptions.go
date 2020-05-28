@@ -26,6 +26,22 @@ func checkDay(daily int) int {
 	}
 }
 
+func convertStatus(status string) int {
+	switch {
+	case status == ALLOWED_STRING:
+		_statusNAC.DailyAllowedDevices = checkDay(_statusNAC.DailyAllowedDevices)
+		return ALLOWED
+	case status == BLOCKED_STRING:
+		_statusNAC.DailyBlockedDevices = checkDay(_statusNAC.DailyBlockedDevices)
+		return BLOCKED
+	case status == UNKNOWN_STRING:
+		_statusNAC.DailyUnknownDevices = checkDay(_statusNAC.DailyUnknownDevices)
+		return UNKNOWN
+	default:
+		return DISCOVERED
+	}
+}
+
 func checkState() {
 	for message_id := range SubscribedMessagesMap {
 		if SubscribedMessagesMap[message_id].valid == true {
@@ -40,21 +56,9 @@ func checkState() {
 				var message DeviceResponse
 				json.Unmarshal([]byte(SubscribedMessagesMap[message_id].message), &message)
 				Request_id := message.Request_id
-				log.Warn("Device Request for ID: ", Request_id)
-				log.Debug("Allowed status: ", DevicesList[Request_id].Allowed, " changing to ",
-					message.Status)
-				log.Warn("Device name is :", message.Name)
+				log.Warn("Device name is: ", message.Name)
 				if DevicesList[Request_id].Alive == true {
-					if message.Status == ALLOWED_STRING {
-						DevicesList[Request_id].Allowed = ALLOWED
-						_statusNAC.DailyAllowedDevices = checkDay(_statusNAC.DailyAllowedDevices)
-					} else if message.Status == BLOCKED_STRING {
-						DevicesList[Request_id].Allowed = BLOCKED
-						_statusNAC.DailyBlockedDevices = checkDay(_statusNAC.DailyBlockedDevices)
-					} else {
-						DevicesList[Request_id].Allowed = UNKNOWN
-						_statusNAC.DailyUnknownDevices = checkDay(_statusNAC.DailyUnknownDevices)
-					}
+					DevicesList[Request_id].Allowed = convertStatus(message.Status)
 					DevicesList[Request_id].Device_name = message.Name
 					if DevicesList[Request_id].Allowed == BLOCKED  || 
 						DevicesList[Request_id].Allowed == UNKNOWN {
@@ -64,7 +68,7 @@ func checkState() {
 					} else if DevicesList[Request_id].Allowed == DISCOVERED {
 						log.Error("DBM did not send us a correct status")
 					} else if DevicesList[Request_id].Allowed == ALLOWED {
-						log.Debug("Device is allowed")
+						log.Trace("Device is allowed")
 					} else {
 						log.Error("We shouldn't hit this error")
 						log.Error("Allowed status: ", DevicesList[Request_id].Allowed)
