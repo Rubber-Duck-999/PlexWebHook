@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -15,30 +14,32 @@ func messageFailure(issue bool) string {
 	return fail
 }
 
-func checkDay(daily int) int {
-	_, _, current_day := time.Now().Date()
-	if current_day == day {
-		daily++
-		return daily
-	} else {
-		_, _, day = time.Now().Date()
-		return 0
-	}
-}
-
 func convertStatus(status string) int {
 	switch {
 	case status == ALLOWED_STRING:
-		_statusNAC.DailyAllowedDevices = checkDay(_statusNAC.DailyAllowedDevices)
 		return ALLOWED
 	case status == BLOCKED_STRING:
-		_statusNAC.DailyBlockedDevices = checkDay(_statusNAC.DailyBlockedDevices)
 		return BLOCKED
 	case status == UNKNOWN_STRING:
-		_statusNAC.DailyUnknownDevices = checkDay(_statusNAC.DailyUnknownDevices)
 		return UNKNOWN
 	default:
 		return DISCOVERED
+	}
+}
+
+func deviceResponse(request_id uint32) {
+	if DevicesList[request_id].Allowed == BLOCKED  || 
+		DevicesList[request_id].Allowed == UNKNOWN {
+		PublishDeviceFound(DevicesList[request_id].Device_name,
+			DevicesList[request_id].Ip_address,
+			DevicesList[request_id].Allowed)
+	} else if DevicesList[request_id].Allowed == DISCOVERED {
+		log.Error("DBM did not send us a correct status")
+	} else if DevicesList[request_id].Allowed == ALLOWED {
+		log.Trace("Device is allowed")
+	} else {
+		log.Error("We shouldn't hit this error")
+		log.Error("Allowed status: ", DevicesList[request_id].Allowed)
 	}
 }
 
@@ -57,25 +58,9 @@ func checkState() {
 				json.Unmarshal([]byte(SubscribedMessagesMap[message_id].message), &message)
 				Request_id := message.Request_id
 				log.Warn("Device name is: ", message.Name)
-				if DevicesList[Request_id].Alive == true {
-					DevicesList[Request_id].Allowed = convertStatus(message.Status)
-					DevicesList[Request_id].Device_name = message.Name
-					if DevicesList[Request_id].Allowed == BLOCKED  || 
-						DevicesList[Request_id].Allowed == UNKNOWN {
-						PublishDeviceFound(DevicesList[Request_id].Device_name,
-							DevicesList[Request_id].Ip_address,
-							DevicesList[Request_id].Allowed)
-					} else if DevicesList[Request_id].Allowed == DISCOVERED {
-						log.Error("DBM did not send us a correct status")
-					} else if DevicesList[Request_id].Allowed == ALLOWED {
-						log.Trace("Device is allowed")
-					} else {
-						log.Error("We shouldn't hit this error")
-						log.Error("Allowed status: ", DevicesList[Request_id].Allowed)
-					}
-				} else {
-					log.Error("We received a response for a non existent device")
-				}
+				DevicesList[Request_id].Allowed = convertStatus(message.Status)
+				DevicesList[Request_id].Device_name = message.Name
+				deviceResponse(Request_id)
 				SubscribedMessagesMap[message_id].valid = false
 			default:
 				log.Warn("We were not expecting this message unvalidating: ",

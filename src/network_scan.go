@@ -51,18 +51,18 @@ func runARP() {
         new_device := true
         mac := fields[3]     
         for id := range DevicesList {
-            DevicesList[id].New = false
-            if DevicesList[id].Mac == mac {
+            if DevicesList[id].Ip_address == ip {
+                new_device = false
                 log.Trace("Device found in Arp table")
                 DevicesList[id].Alive = true
-                DevicesList[id].Ip_address = ip
-            } else {
-                DevicesList[id].Alive = false              
+                if DevicesList[id].Allowed != DISCOVERED {
+                    DevicesList[id].New = false
+                }
             }
         }
         if new_device {
             if mac != "<incomplete>" {
-                log.Debug("Adding device ip: ", ip)
+                log.Warn("Adding device ip: ", ip)
                 response, err := http.Get("https://api.macvendors.com/" + mac)
                 if err != nil {
                     log.Error("The HTTP request failed with error \n", err)
@@ -76,6 +76,13 @@ func runARP() {
                 }
                 time.Sleep(1 * time.Second)
             }
+        }
+    }
+    for id := range DevicesList {
+        if DevicesList[id].New && DevicesList[id].Allowed != DISCOVERED {
+            log.Trace("Device found in Arp table")
+            DevicesList[id].Alive = false
+            DevicesList[id].New = false
         }
     }
 }
@@ -125,40 +132,52 @@ func nmap_scan() {
     log.Debug("Nmap done: ", len(result.Hosts), " hosts up scanned in seconds ",  result.Stats.Finished.Elapsed)
 }
 
+func stateDevices(id uint32) {
+    if DevicesList[id].Allowed == DISCOVERED {
+        PublishDeviceRequest(id,
+            DevicesList[id].Device_name,
+            DevicesList[id].Mac)
+    } else if DevicesList[id].Allowed == ALLOWED {
+        _statusNAC.DailyAllowedDevices++
+    } else if DevicesList[id].Allowed == BLOCKED {
+        _statusNAC.DailyBlockedDevices++
+    } else if DevicesList[id].Allowed == UNKNOWN {
+        _statusNAC.DailyUnknownDevices++
+    }
+    _statusNAC.DevicesActive++
+}
+
 func checkDevices() {
     done := false
     for {
         if done == false {
             nmap_scan()
             runARP()
-            log.Warn("### Devices ###")
-            _statusNAC.DevicesActive = 0
-            for id := range DevicesList {
-                log.Warn("Device - ", DevicesList[id].Device_name, " : ",
-                    DevicesList[id].Ip_address, " : ", 
-                    DevicesList[id].Mac, " : ",
-                    DevicesList[id].Alive, " : ",
-                    DevicesList[id].Allowed)
-                if DevicesList[id].Alive {
-                    if DevicesList[id].Allowed == DISCOVERED {
-                        PublishDeviceRequest(id,
-                            DevicesList[id].Device_name,
-                            DevicesList[id].Mac)
-                    } else {
-                        log.Debug("Device is Allowed so moving to next")
-                    }
-                    _statusNAC.DevicesActive++
-                }
-            }
-            log.Debug("### End of ARP ###")
-            log.Debug("Starting Status NAC publish")
-            log.Debug("Current message : ", _statusNAC)
-            log.Debug("### End of Status ###")
-            PublishStatusNAC()
             done = true
         } else {
             done = false
         }
+        log.Warn("### Devices ###")
+        _statusNAC.DevicesActive = 0
+        _statusNAC.DailyAllowedDevices = 0
+        _statusNAC.DailyBlockedDevices = 0
+        _statusNAC.DailyUnknownDevices = 0
+        for id := range DevicesList {
+            log.Warn("Device - ", DevicesList[id].Device_name, " : ",
+                DevicesList[id].Ip_address, " : ", 
+                DevicesList[id].Mac, " : ",
+                DevicesList[id].Alive, " : ",
+                DevicesList[id].Allowed, " : ",
+                DevicesList[id].New)
+            if DevicesList[id].Alive {
+                stateDevices(id)
+            }
+        }
+        log.Debug("### End of ARP ###")
+        log.Debug("Starting Status NAC publish")
+        log.Debug("Current message : ", _statusNAC)
+        log.Debug("### End of Status ###")
+        PublishStatusNAC()
         time.Sleep(2 * time.Minute)
     }
 }

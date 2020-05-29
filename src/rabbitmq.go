@@ -16,12 +16,6 @@ var pinCode int
 var day int
 
 func init() {
-	log.Trace("Initialised rabbitmq package")
-	conn, init_err = amqp.Dial("amqp://guest:password@localhost:5672/")
-	failOnError(init_err, "Failed to connect to RabbitMQ")
-
-	ch, init_err = conn.Channel()
-	failOnError(init_err, "Failed to open a channel")
 	_, _, day := time.Now().Date()
 	log.Debug("Day currently: ", day)
 }
@@ -67,18 +61,20 @@ func messages(routing_key string, value string) {
 	}
 }
 
-func Subscribe() {
+func SetConnection() error{
 	conn, init_err = amqp.Dial("amqp://guest:" + password + "@localhost:5672/")
 	failOnError(init_err, "Failed to connect to RabbitMQ")
 
 	ch, init_err = conn.Channel()
 	failOnError(init_err, "Failed to open a channel")
+	return init_err
+}
 
-	log.Warn("Beginning rabbitmq initialisation")
-	failOnError(init_err, "Rabbitmq error")
+func Subscribe() {
+	init := SetConnection()
 
 	DevicesList = make(map[uint32]*Device)
-	if init_err == nil {
+	if init == nil {
 		var topics = [2]string{
 			DATAINFO,
 			DEVICERESPONSE,
