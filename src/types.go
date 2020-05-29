@@ -3,18 +3,23 @@ package main
 type ConfigTypes struct {
 	Settings struct {
 		Code    string `yaml:"code"`
+		Port    string `yaml:"port"`
 	} `yaml:"settings"`
 }
 
-type FailureNetwork struct {
-	Time         string `json:"time"`
-	Failure_type string `json:"type_of_failure"`
+// ESC Messages
+
+type AuthenticationRequest struct {
+	GUID string `json:"guid"`
+	Device_Name string `json:"device_name"`
+	Mac  string `json:"mac"`
 }
 
-type RequestImage struct {
-	Request_id string `json:"request_id"`
-	Time_from string `json:"time_from"`
-	Time_to string `json:"time_to"`
+type DeviceAdd struct {
+	GUID string `json:"guid"`
+	Name string `json:"name"`
+	Mac string `json:"mac"`
+	Status int `json:"status"`
 }
 
 type RequestData struct {
@@ -22,6 +27,14 @@ type RequestData struct {
 	Time_from string `json:"time_from"`
 	Time_to string `json:"time_to"`
 	Type string `json:"type"`
+}
+
+
+// End of ESC messages
+
+type FailureNetwork struct {
+	Time         string `json:"time"`
+	Failure_type string `json:"type_of_failure"`
 }
 
 type RequestDatabase struct {

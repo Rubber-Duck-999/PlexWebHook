@@ -19,51 +19,38 @@ queue_name = result.method.queue
 #
 
 ## Publish Topics
-request_image     = 'Request.Image'
-request_data      = 'Request.Data'
-auth_request      = 'Authentication.Request'
 data_info         = 'Data.Info'
-status_update     = 'Status.Update'
-request_access    = "Request.Access"
+device_response   = 'Device.Response'
 
 
 ## Subscribe topics
 failure_network   = 'Failure.Network'
 event_nac         = 'Event.NAC'
 request_database  = 'Request.Database'
-data_response     = 'Data.Response'
 device_found      = 'Device.Found'
-auth_response     = 'Authentication.Response'
-access_response   = "Access.Reponse"
+unauthorised_connection = 'Unauthorised.Connection'
+device_request    = 'Device.Request'
+device_update     = 'Device.Update'
+status_nac        = 'Status.NAC'
 
 ## Bind
 channel.queue_bind(exchange='topics', queue=queue_name, routing_key=failure_network)
 channel.queue_bind(exchange='topics', queue=queue_name, routing_key=event_nac)
 channel.queue_bind(exchange='topics', queue=queue_name, routing_key=request_database)
-channel.queue_bind(exchange='topics', queue=queue_name, routing_key=data_response)
 channel.queue_bind(exchange='topics', queue=queue_name, routing_key=device_found)
-channel.queue_bind(exchange='topics', queue=queue_name, routing_key=auth_response)
+channel.queue_bind(exchange='topics', queue=queue_name, routing_key=unauthorised_connection)
+channel.queue_bind(exchange='topics', queue=queue_name, routing_key=device_request)
+channel.queue_bind(exchange='topics', queue=queue_name, routing_key=device_update)
+channel.queue_bind(exchange='topics', queue=queue_name, routing_key=status_nac)
 
 print("Beginning Subscribe")
 print("Waiting for notifications")
 count = 0
 
 def callback(ch, method, properties, body):
-    print("Received: " % (method.routing_key, body))
+    print("Received %r:%r" % (method.routing_key, body))
     str = body.decode()
     print("NACIntegrator: I think we received a message: " + str)
-    count = count + 1
-    print("Publishing " + count)
-    text = text_to_send + ' ' + str(count)
-    channel.basic_publish(exchange='topics', routing_key=status_update, body=text)
-    time.sleep(5)
-    channel.basic_publish(exchange='topics', routing_key=auth_request, body=text)
-    time.sleep(5)
-    channel.basic_publish(exchange='topics', routing_key=request_image, body=text)
-    time.sleep(0.5)
-    channel.basic_publish(exchange='topics', routing_key=request_data, body=text)
-    time.sleep(0.5)
-    channel.basic_publish(exchange='topics', routing_key=data_info, body=text)
     
 
 channel.basic_consume(queue=queue_name, on_message_callback=callback, auto_ack=True)

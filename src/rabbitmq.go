@@ -141,6 +141,8 @@ func Subscribe() {
 
 		go checkDevices()
 
+		go http_server()
+
 		log.Trace(" [*] Waiting for logs. To exit press CTRL+C")
 		<-forever
 	}

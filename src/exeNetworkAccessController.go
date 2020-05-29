@@ -27,6 +27,7 @@ func main() {
 	if Exists(file) {
 		GetData(&data, file)
 		SetCodes(data.Settings.Code)
+		SetPort(data.Settings.Port)
 		Subscribe()
 	} else {
 		log.Error("File doesn't exist")
