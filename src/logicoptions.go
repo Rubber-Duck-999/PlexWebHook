@@ -41,6 +41,7 @@ func deviceResponse(request_id uint32) {
 func dataInfoControl(data DataInfo) {
 	if data.Id == current_id {
 		log.Debug("Same id received")
+		log.Debug(data)
 		if data.Message_num < data.Total_message {
 			data_messages = append(data_messages, data)
 			_messages_done = false

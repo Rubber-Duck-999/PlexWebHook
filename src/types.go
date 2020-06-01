@@ -27,7 +27,7 @@ type RequestData struct {
 	Request_id int `json:"request_id"`
 	Time_from string `json:"time_from"`
 	Time_to string `json:"time_to"`
-	Type string `json:"type"`
+	EventTypeId string `json:"event_type_id"`
 }
 
 // End of ESC messages
@@ -41,15 +41,15 @@ type RequestDatabase struct {
 	Request_id int `json:"request_id"`
 	Time_from string `json:"time_from"`
 	Time_to string `json:"time_to"`
-	Type string `json:"type"`
+	EventTypeId string `json:"event_type_id"`
 }
 
 type DataInfo struct {
-	Id int `json:"id"`
-	Message_num int `json:"message_num"`
-	Total_message int `json:"total"`
-    Message string `json:"message"`
-	Time string `json:"Time"`
+	Id int `json:"_id"`
+	Message_num int `json:"_messageNum"`
+	Total_message int `json:"_totalMessage"`
+    Message string `json:"_topicMessage"`
+	Time string `json:"_timeSent"`
 }
 
 type UnauthorisedConnection struct {
