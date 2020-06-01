@@ -14,6 +14,7 @@ var init_err error
 var password string
 var pinCode int
 var day int
+var current_id int
 
 func init() {
 	_, _, day := time.Now().Date()
@@ -148,13 +149,14 @@ func Subscribe() {
 	}
 }
 
-func PublishEventNAC(component string, message string, time string) string {
+func PublishEventNAC(message string, time string, event_type_id string) string {
 	failure := ""
 
 	eventNAC, err := json.Marshal(&EventNAC{
-		Component:    component,
+		Component:    COMPONENT,
 		Message:      message,
-		Time:         time})
+		Time:         time,
+		EventTypeId:  event_type_id})
 	if err != nil {
 		failure = "Failed to convert EventNAC"
 		log.Warn(failure)

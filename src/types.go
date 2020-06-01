@@ -9,12 +9,6 @@ type ConfigTypes struct {
 
 // ESC Messages
 
-type AuthenticationRequest struct {
-	GUID string `json:"guid"`
-	Device_Name string `json:"device_name"`
-	Mac  string `json:"mac"`
-}
-
 type DeviceAdd struct {
 	GUID string `json:"guid"`
 	Name string `json:"name"`
@@ -22,13 +16,19 @@ type DeviceAdd struct {
 	Status int `json:"status"`
 }
 
+type UserAdd struct {
+	GUID string `json:"guid"`
+	User string `json:"user"`
+	Pin int `json:"pin"`
+}
+
 type RequestData struct {
-	Request_id string `json:"request_id"`
+	GUID string `json:"guid"`
+	Request_id int `json:"request_id"`
 	Time_from string `json:"time_from"`
 	Time_to string `json:"time_to"`
 	Type string `json:"type"`
 }
-
 
 // End of ESC messages
 
@@ -46,6 +46,8 @@ type RequestDatabase struct {
 
 type DataInfo struct {
 	Id int `json:"id"`
+	Message_num int `json:"message_num"`
+	Total_message int `json:"total"`
     Message string `json:"message"`
 	Time string `json:"Time"`
 }
@@ -60,6 +62,7 @@ type EventNAC struct {
 	Component    string `json:"component"`
 	Message      string `json:"message"`
 	Time         string `json:"time"`
+	EventTypeId  string `json:"event_type_id"`
 }
 
 type ApiResponse struct {
@@ -141,7 +144,7 @@ const EXCHANGETYPE string = "topic"
 const TIMEFORMAT string = "20060102150405"
 const COMPONENT string = "NAC"
 const FAILUREPUBLISH string = "Failed to publish"
-const SERVERERROR string = "Server is failing to send"
+const UNKNOWN_DEVICE string = "New device connected - "
 //
 const ALLOWED int = 1
 const BLOCKED int = 2

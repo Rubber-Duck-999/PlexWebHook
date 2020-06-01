@@ -9,7 +9,7 @@ import (
 
 func main() {
 	log.SetLevel(log.DebugLevel)
-	log.Warn("FH - Beginning to run Network Access Controller Program")
+	log.Warn("NAC - Beginning to run Network Access Controller Program")
 	parser := argparse.NewParser("file", "Config file for runtime purpose")
 	// Create string flag
 	f := parser.String("f", "config", &argparse.Options{Required: true, Help: "Necessary config"})

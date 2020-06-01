@@ -6,14 +6,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func messageFailure(issue bool) string {
-	fail := ""
-	if issue {
-		fail = PublishEventNAC(COMPONENT, SERVERERROR, getTime())
-	}
-	return fail
-}
-
 func convertStatus(status string) int {
 	switch {
 	case status == ALLOWED_STRING:
@@ -37,9 +29,35 @@ func deviceResponse(request_id uint32) {
 		log.Error("DBM did not send us a correct status")
 	} else if DevicesList[request_id].Allowed == ALLOWED {
 		log.Trace("Device is allowed")
+	} else if DevicesList[request_id].Allowed == UNKNOWN {
+		PublishEventNAC(UNKNOWN_DEVICE + DevicesList[request_id].Mac, 
+			getTime(), "NAC3")
 	} else {
 		log.Error("We shouldn't hit this error")
 		log.Error("Allowed status: ", DevicesList[request_id].Allowed)
+	}
+}
+
+func dataInfoControl(data DataInfo) {
+	if data.Id == current_id {
+		log.Debug("Same id received")
+		if data.Message_num < data.Total_message {
+			data_messages = append(data_messages, data)
+			_messages_done = false
+		} else {
+			data_messages = append(data_messages, data)
+			_messages_done = true
+		}
+	} else {
+		data_messages = nil
+		current_id = data.Id
+		if data.Total_message == 1 && data.Message_num < 2 {
+			data_messages = append(data_messages, data)
+			_messages_done = true
+		} else {
+			data_messages = append(data_messages, data)
+			_messages_done = false
+		}	
 	}
 }
 
@@ -51,6 +69,10 @@ func checkState() {
 			switch {
 			case SubscribedMessagesMap[message_id].routing_key == DATAINFO:
 				log.Warn("Received a data info topic")
+				var message DataInfo
+				json.Unmarshal([]byte(SubscribedMessagesMap[message_id].message), &message)
+				dataInfoControl(message)
+				SubscribedMessagesMap[message_id].valid = false
 
 			case SubscribedMessagesMap[message_id].routing_key == DEVICERESPONSE:
 				log.Warn("Received a device response topic")
@@ -62,6 +84,7 @@ func checkState() {
 				DevicesList[Request_id].Device_name = message.Name
 				deviceResponse(Request_id)
 				SubscribedMessagesMap[message_id].valid = false
+
 			default:
 				log.Warn("We were not expecting this message unvalidating: ",
 					SubscribedMessagesMap[message_id].routing_key)
