@@ -61,8 +61,6 @@ func device_add(w http.ResponseWriter, r *http.Request) {
 			PublishDeviceUpdate(device.Name, device.Mac,
 								device.Status, r.Method)
 			w.WriteHeader(http.StatusOK)
-		} else {
-			log.Error("Invalid GUID")
 		}
 	}
 }

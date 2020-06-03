@@ -13,7 +13,7 @@ type DeviceAdd struct {
 	GUID string `json:"guid"`
 	Name string `json:"name"`
 	Mac string `json:"mac"`
-	Status int `json:"status"`
+	Status string `json:"status"`
 }
 
 type UserAdd struct {
@@ -94,7 +94,7 @@ type DeviceFoundTopic struct {
 type DeviceUpdate struct {
 	Name string `json:"name"`
 	Mac string `json:"mac"`
-	Status int `json:"status"`
+	Status string `json:"status"`
 	State string `json:"state"`
 }
 

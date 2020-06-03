@@ -149,6 +149,27 @@ func Subscribe() {
 	}
 }
 
+func Publish(message []byte, routingKey string) string {
+	failure := ""
+	if init_err == nil {
+		log.Debug(string(message))
+		err := ch.Publish(
+			EXCHANGENAME, // exchange
+			routingKey,      // routing key
+			false,        // mandatory
+			false,        // immediate
+			amqp.Publishing{
+				ContentType: "application/json",
+				Body:        []byte(message),
+			})
+		if err != nil {
+			log.Fatal(err)
+			failure = FAILUREPUBLISH
+		}
+	}
+	return failure
+}
+
 func PublishEventNAC(message string, time string, event_type_id string) string {
 	failure := ""
 
@@ -161,22 +182,7 @@ func PublishEventNAC(message string, time string, event_type_id string) string {
 		failure = "Failed to convert EventNAC"
 		log.Warn(failure)
 	} else {
-		if init_err == nil {
-			log.Debug(string(eventNAC))
-			err = ch.Publish(
-				EXCHANGENAME, // exchange
-				EVENTNAC,      // routing key
-				false,        // mandatory
-				false,        // immediate
-				amqp.Publishing{
-					ContentType: "application/json",
-					Body:        []byte(eventNAC),
-				})
-			if err != nil {
-				log.Fatal(err)
-				failure = FAILUREPUBLISH
-			}
-		}
+		failure = Publish(eventNAC, EVENTNAC)
 	}
 	return failure
 }
@@ -191,22 +197,7 @@ func PublishFailureNetwork(time string, reason string) string {
 		failure = "Failed to convert FailureNetwork"
 		log.Warn(failure)
 	} else {
-		if init_err == nil {
-			log.Debug(string(failureNetwork))
-			err = ch.Publish(
-				EXCHANGENAME, // exchange
-				FAILURENETWORK,  // routing key
-				false,        // mandatory
-				false,        // immediate
-				amqp.Publishing{
-					ContentType: "application/json",
-					Body:        []byte(failureNetwork),
-				})
-			if err != nil {
-				log.Fatal(err)
-				failure = FAILUREPUBLISH
-			}
-		}
+		failure = Publish(failureNetwork, FAILURENETWORK)
 	}
 	return failure
 }
@@ -223,22 +214,7 @@ func PublishRequestDatabase(id int, time_from string, time_to string, message st
 		failure = "Failed to convert RequestDatabase"
 		log.Warn(failure)
 	} else {
-		if init_err == nil {
-			log.Debug("RequestDatabase: ", string(request))
-			err = ch.Publish(
-				EXCHANGENAME, // exchange
-				REQUESTDATABASE,  // routing key
-				false,        // mandatory
-				false,        // immediate
-				amqp.Publishing{
-					ContentType: "application/json",
-					Body:        []byte(request),
-				})
-			if err != nil {
-				log.Fatal(err)
-				failure = FAILUREPUBLISH
-			}
-		}
+		failure = Publish(request, REQUESTDATABASE)
 	}
 	return failure
 }
@@ -254,22 +230,7 @@ func PublishDeviceFound(name string, address string, status int) string {
 		failure = "Failed to convert DeviceFound"
 		log.Warn(failure)
 	} else {
-		if init_err == nil {
-			log.Debug(string(device))
-			err = ch.Publish(
-				EXCHANGENAME, // exchange
-				DEVICEFOUND,  // routing key
-				false,        // mandatory
-				false,        // immediate
-				amqp.Publishing{
-					ContentType: "application/json",
-					Body:        []byte(device),
-				})
-			if err != nil {
-				log.Fatal(err)
-				failure = FAILUREPUBLISH
-			}
-		}
+		failure = Publish(device, DEVICEFOUND)
 	}
 	return failure
 }
@@ -285,27 +246,12 @@ func PublishDeviceRequest(id uint32, name string, mac string) string {
 		failure = "Failed to convert DeviceRequest"
 		log.Warn(failure)
 	} else {
-		if init_err == nil {
-			log.Trace(string(device))
-			err = ch.Publish(
-				EXCHANGENAME, // exchange
-				DEVICEREQUEST,  // routing key
-				false,        // mandatory
-				false,        // immediate
-				amqp.Publishing{
-					ContentType: "application/json",
-					Body:        []byte(device),
-				})
-			if err != nil {
-				log.Fatal(err)
-				failure = FAILUREPUBLISH
-			}
-		}
+		failure = Publish(device, DEVICEREQUEST)
 	}
 	return failure
 }
 
-func PublishDeviceUpdate(name string, mac string, status int, state string) string {
+func PublishDeviceUpdate(name string, mac string, status string, state string) string {
 	failure := ""
 
 	device, err := json.Marshal(&DeviceUpdate{
@@ -317,22 +263,7 @@ func PublishDeviceUpdate(name string, mac string, status int, state string) stri
 		failure = "Failed to convert DeviceUpdate"
 		log.Warn(failure)
 	} else {
-		if init_err == nil {
-			log.Debug(string(device))
-			err = ch.Publish(
-				EXCHANGENAME, // exchange
-				DEVICEUPDATE,  // routing key
-				false,        // mandatory
-				false,        // immediate
-				amqp.Publishing{
-					ContentType: "application/json",
-					Body:        []byte(device),
-				})
-			if err != nil {
-				log.Fatal(err)
-				failure = FAILUREPUBLISH
-			}
-		}
+		failure = Publish(device, DEVICEUPDATE)
 	}
 	return failure
 }
@@ -348,21 +279,7 @@ func PublishUnauthorisedConnection(mac string, time string, alive bool) string {
 		failure = "Failed to convert UnauthorisedConnection"
 		log.Warn(failure)
 	} else {
-		if init_err == nil {
-			err = ch.Publish(
-				EXCHANGENAME, // exchange
-				UNAUTHORISEDCONNECTION,  // routing key
-				false,        // mandatory
-				false,        // immediate
-				amqp.Publishing{
-					ContentType: "application/json",
-					Body:        []byte(connection),
-				})
-			if err != nil {
-				log.Fatal(err)
-				failure = FAILUREPUBLISH
-			}
-		}
+		failure = Publish(connection, UNAUTHORISEDCONNECTION)
 	}
 	return failure
 }
@@ -375,21 +292,7 @@ func PublishStatusNAC() string {
 		failure = "Failed to convert StatusNAC"
 		log.Warn(failure)
 	} else {
-		if init_err == nil {
-			err = ch.Publish(
-				EXCHANGENAME, // exchange
-				STATUSNAC,  // routing key
-				false,        // mandatory
-				false,        // immediate
-				amqp.Publishing{
-					ContentType: "application/json",
-					Body:        []byte(converted),
-				})
-			if err != nil {
-				log.Fatal(err)
-				failure = FAILUREPUBLISH
-			}
-		}
+		failure = Publish(converted, STATUSNAC)
 	}
 	return failure
 }
