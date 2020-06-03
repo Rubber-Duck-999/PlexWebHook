@@ -218,13 +218,13 @@ func PublishRequestDatabase(id int, time_from string, time_to string, message st
 		Request_id: id,
 		Time_from:  time_from,
 		Time_to:    time_to,
-		EventTypeId:       message})
+		EventTypeId: message})
 	if err != nil {
 		failure = "Failed to convert RequestDatabase"
 		log.Warn(failure)
 	} else {
 		if init_err == nil {
-			log.Debug(string(request))
+			log.Debug("RequestDatabase: ", string(request))
 			err = ch.Publish(
 				EXCHANGENAME, // exchange
 				REQUESTDATABASE,  // routing key

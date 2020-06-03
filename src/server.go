@@ -29,6 +29,7 @@ func SetPort(port string) {
 }
 
 func isValidGUID(guid string) bool {
+	log.Warn("Valid GUID")
 	return true
 }
 
@@ -94,7 +95,6 @@ func data_request(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 		json.Unmarshal(req_body, &request)
-		log.Debug(request)
 		if isValidGUID(request.GUID) && isValidRequest(request.Request_id) {
 			PublishRequestDatabase(request.Request_id, request.Time_from, 
 							request.Time_to, request.EventTypeId)
@@ -110,7 +110,6 @@ func data_request(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusBadRequest)
 			}
 		} else {
-			log.Error("Invalid GUID")
 			w.WriteHeader(http.StatusBadRequest)
 		}
 	}
