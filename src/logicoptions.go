@@ -49,16 +49,6 @@ func dataInfoControl(data DataInfo) {
 			data_messages = append(data_messages, data)
 			_messages_done = true
 		}
-	} else {
-		data_messages = nil
-		current_id = data.Id
-		if data.Total_message == 1 && data.Message_num < 2 {
-			data_messages = append(data_messages, data)
-			_messages_done = true
-		} else {
-			data_messages = append(data_messages, data)
-			_messages_done = false
-		}	
 	}
 }
 

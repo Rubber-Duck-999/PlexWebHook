@@ -32,6 +32,20 @@ func isValidGUID(guid string) bool {
 	return true
 }
 
+func isValidRequest(id int) bool {
+	log.Debug("Checking whether request id was new and valid")
+	if id == current_id {
+		log.Warn("Already received this, invalidating")
+		return false
+	} else {
+		current_id = id
+		_statusNAC.TimeEscConnected = getTime()
+		_messages_done = false
+		data_messages = nil
+		return true
+	}
+}
+
 func device_add(w http.ResponseWriter, r *http.Request) {
 	var device DeviceAdd
 	req_body, err := ioutil.ReadAll(r.Body)
@@ -41,6 +55,7 @@ func device_add(w http.ResponseWriter, r *http.Request) {
 	} else {
 		json.Unmarshal(req_body, &device)
 		if isValidGUID(device.GUID) {
+			_statusNAC.TimeEscConnected = getTime()
 			log.Debug("Received Device Name: ", device.Name)
 			PublishDeviceUpdate(device.Name, device.Mac,
 								device.Status, r.Method)
@@ -60,6 +75,7 @@ func user_add(w http.ResponseWriter, r *http.Request) {
 	} else {
 		json.Unmarshal(req_body, &user)
 		if isValidGUID(user.GUID) {
+			_statusNAC.TimeEscConnected = getTime()
 			log.Debug("Received User Name: ", user.User)
 			//PublishUserUpdate(user.User, user.Pin, r.Method)
 			w.WriteHeader(http.StatusOK)
@@ -79,23 +95,23 @@ func data_request(w http.ResponseWriter, r *http.Request) {
 	} else {
 		json.Unmarshal(req_body, &request)
 		log.Debug(request)
-		if isValidGUID(request.GUID) {
+		if isValidGUID(request.GUID) && isValidRequest(request.Request_id) {
 			PublishRequestDatabase(request.Request_id, request.Time_from, 
 							request.Time_to, request.EventTypeId)
-							loop := 0
+			loop := 0
 			for _messages_done == false && loop < 4 {
 				time.Sleep(1 * time.Second)
 				loop++
 			}
-		if _messages_done {
-			w.WriteHeader(http.StatusOK)
-			json.NewEncoder(w).Encode(data_messages)
-		} else {
-			w.WriteHeader(http.StatusBadRequest)
-		}
-
+			if _messages_done {
+				w.WriteHeader(http.StatusOK)
+				json.NewEncoder(w).Encode(data_messages)
+			} else {
+				w.WriteHeader(http.StatusBadRequest)
+			}
 		} else {
 			log.Error("Invalid GUID")
+			w.WriteHeader(http.StatusBadRequest)
 		}
 	}
 }
