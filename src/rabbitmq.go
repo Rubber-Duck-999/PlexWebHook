@@ -29,7 +29,7 @@ func failOnError(err error, msg string) {
 	if err != nil {
 		log.WithFields(log.Fields{
 			"Message": msg, "Error": err,
-		}).Trace("Rabbitmq error")
+		}).Error("Rabbitmq error")
 	}
 }
 
@@ -150,7 +150,6 @@ func Subscribe() {
 }
 
 func Publish(message []byte, routingKey string) string {
-	failure := ""
 	if init_err == nil {
 		log.Debug(string(message))
 		err := ch.Publish(
@@ -164,135 +163,113 @@ func Publish(message []byte, routingKey string) string {
 			})
 		if err != nil {
 			log.Fatal(err)
-			failure = FAILUREPUBLISH
+			return FAILUREPUBLISH
 		}
 	}
-	return failure
+	return ""
 }
 
 func PublishEventNAC(message string, time string, event_type_id string) string {
-	failure := ""
-
 	eventNAC, err := json.Marshal(&EventNAC{
 		Component:    COMPONENT,
 		Message:      message,
 		Time:         time,
 		EventTypeId:  event_type_id})
 	if err != nil {
-		failure = "Failed to convert EventNAC"
-		log.Warn(failure)
+		return "Failed to convert EventNAC"
 	} else {
-		failure = Publish(eventNAC, EVENTNAC)
+		return Publish(eventNAC, EVENTNAC)
 	}
-	return failure
+}
+
+func PublishGUIDUpdate(guid string) string {
+	update, err := json.Marshal(&GUIDUpdate{
+		GUID: guid})
+	if err != nil {
+		return "Failed to convert GUID.Update"
+	} else {
+		return Publish(update, EVENTNAC)
+	}
 }
 
 func PublishFailureNetwork(time string, reason string) string {
-	failure := ""
-
 	failureNetwork, err := json.Marshal(&FailureNetwork{
 		Time:         time,
 		Failure_type: reason})
 	if err != nil {
-		failure = "Failed to convert FailureNetwork"
-		log.Warn(failure)
+		return "Failed to convert FailureNetwork"
 	} else {
-		failure = Publish(failureNetwork, FAILURENETWORK)
+		return Publish(failureNetwork, FAILURENETWORK)
 	}
-	return failure
 }
 
 func PublishRequestDatabase(id int, time_from string, time_to string, message string) string {
-	failure := ""
-
 	request, err := json.Marshal(&RequestDatabase{
 		Request_id: id,
 		Time_from:  time_from,
 		Time_to:    time_to,
 		EventTypeId: message})
 	if err != nil {
-		failure = "Failed to convert RequestDatabase"
-		log.Warn(failure)
+		return "Failed to convert RequestDatabase"
 	} else {
-		failure = Publish(request, REQUESTDATABASE)
+		return Publish(request, REQUESTDATABASE)
 	}
-	return failure
 }
 
 func PublishDeviceFound(name string, address string, status int) string {
-	failure := ""
-
 	device, err := json.Marshal(&DeviceFoundTopic{
 		Device_name: name,
 		Ip_address:  address,
 		Status: status})
 	if err != nil {
-		failure = "Failed to convert DeviceFound"
-		log.Warn(failure)
+		return "Failed to convert DeviceFound"
 	} else {
-		failure = Publish(device, DEVICEFOUND)
+		return Publish(device, DEVICEFOUND)
 	}
-	return failure
 }
 
 func PublishDeviceRequest(id uint32, name string, mac string) string {
-	failure := ""
-
 	device, err := json.Marshal(&DeviceRequest{
 		Request_id: id,
 		Name: name,
 		Mac: mac})
 	if err != nil {
-		failure = "Failed to convert DeviceRequest"
-		log.Warn(failure)
+		return "Failed to convert DeviceRequest"
 	} else {
-		failure = Publish(device, DEVICEREQUEST)
+		return Publish(device, DEVICEREQUEST)
 	}
-	return failure
 }
 
 func PublishDeviceUpdate(name string, mac string, status string, state string) string {
-	failure := ""
-
 	device, err := json.Marshal(&DeviceUpdate{
 		Name: name,
 		Mac: mac,
 		Status: status,
 		State: state})
 	if err != nil {
-		failure = "Failed to convert DeviceUpdate"
-		log.Warn(failure)
+		return "Failed to convert DeviceUpdate"
 	} else {
-		failure = Publish(device, DEVICEUPDATE)
+		return Publish(device, DEVICEUPDATE)
 	}
-	return failure
 }
 
 func PublishUnauthorisedConnection(mac string, time string, alive bool) string {
-	failure := ""
-
 	connection, err := json.Marshal(&UnauthorisedConnection{
 		Mac:  mac,
 		Time: time,
 		Alive: alive})
 	if err != nil {
-		failure = "Failed to convert UnauthorisedConnection"
-		log.Warn(failure)
+		return "Failed to convert UnauthorisedConnection"
 	} else {
-		failure = Publish(connection, UNAUTHORISEDCONNECTION)
+		return Publish(connection, UNAUTHORISEDCONNECTION)
 	}
-	return failure
 }
 
 func PublishStatusNAC() string {
-	failure := ""
-
 	converted, err := json.Marshal(&_statusNAC)
 	if err != nil {
-		failure = "Failed to convert StatusNAC"
-		log.Warn(failure)
+		return "Failed to convert StatusNAC"
 	} else {
-		failure = Publish(converted, STATUSNAC)
+		return Publish(converted, STATUSNAC)
 	}
-	return failure
 }

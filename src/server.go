@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"math/rand"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -13,6 +14,7 @@ import (
 var _port string
 var _device_status string
 var _messages_done bool
+var _guid string
 
 type allData []DataInfo
 
@@ -23,6 +25,17 @@ func init() {
 	_port = "0"
 }
 
+func SetGUID() {
+	rand.Seed(time.Now().UnixNano())
+
+	b := make([]rune, 10)
+    for i := range b {
+        b[i] = letters[rand.Intn(len(letters))]
+    }
+	_guid = string(b)
+	log.Debug("GUID set to: ", _guid)
+}
+
 func SetPort(port string) {
 	log.Debug("Port set")
 	_port = port
@@ -30,7 +43,10 @@ func SetPort(port string) {
 
 func isValidGUID(guid string) bool {
 	log.Warn("Valid GUID")
-	return true
+	if guid == _guid {
+		return true
+	}
+	return false
 }
 
 func isValidRequest(id int) bool {
@@ -55,7 +71,7 @@ func device_add(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 		json.Unmarshal(req_body, &device)
-		if isValidGUID(device.GUID) {
+		if isValidGUID(device.GUID) && isValidRequest(device.Request_id) {
 			_statusNAC.TimeEscConnected = getTime()
 			log.Debug("Received Device Name: ", device.Name)
 			PublishDeviceUpdate(device.Name, device.Mac,
@@ -73,7 +89,7 @@ func user_add(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 		json.Unmarshal(req_body, &user)
-		if isValidGUID(user.GUID) {
+		if isValidGUID(user.GUID) && isValidRequest(user.Request_id) {
 			_statusNAC.TimeEscConnected = getTime()
 			log.Debug("Received User Name: ", user.User)
 			//PublishUserUpdate(user.User, user.Pin, r.Method)
@@ -114,6 +130,7 @@ func data_request(w http.ResponseWriter, r *http.Request) {
 }
 
 func http_server() {
+	PublishGUIDUpdate(_guid)
 	router := mux.NewRouter().StrictSlash(true)
 	// Set up of methods
 	router.HandleFunc("/device", device_add).Methods("POST")

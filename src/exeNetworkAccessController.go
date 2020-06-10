@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	log.SetLevel(log.WarnLevel)
+	log.SetLevel(log.DebugLevel)
 	log.Warn("NAC - Beginning to run Network Access Controller Program")
 	parser := argparse.NewParser("file", "Config file for runtime purpose")
 	// Create string flag
@@ -28,6 +28,7 @@ func main() {
 		GetData(&data, file)
 		SetCodes(data.Settings.Code)
 		SetPort(data.Settings.Port)
+		SetGUID()
 		Subscribe()
 	} else {
 		log.Error("File doesn't exist")

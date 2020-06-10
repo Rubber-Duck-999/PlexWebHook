@@ -11,6 +11,7 @@ type ConfigTypes struct {
 
 type DeviceAdd struct {
 	GUID string `json:"guid"`
+	Request_id int `json:"request_id"`
 	Name string `json:"name"`
 	Mac string `json:"mac"`
 	Status string `json:"status"`
@@ -18,6 +19,7 @@ type DeviceAdd struct {
 
 type UserAdd struct {
 	GUID string `json:"guid"`
+	Request_id int `json:"request_id"`
 	User string `json:"user"`
 	Pin int `json:"pin"`
 }
@@ -119,6 +121,10 @@ type StatusNAC struct {
 	TimeEscConnected string `json:"time"`
 }
 
+type GUIDUpdate struct {
+	GUID string `json:"guid"`
+}
+
 //Topics
 const REQUESTDATA string = "Request.Data"
 const AUTHENTICATIONREQUEST string = "Authentication.Request"
@@ -156,6 +162,8 @@ const DISCOVERED_STRING string = "DISCOVERED"
 const UNKNOWN_STRING string = "UNKNOWN"
 //
 const START_ADDRESS string = "192.168.0."
+var letters = []rune("abcdefghijklmnopqrstuvwxyzAB" +
+"CDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_$£")
 //
 var SubscribedMessagesMap map[uint32]*MapMessage
 var DevicesList map[uint32]*Device
