@@ -11,10 +11,10 @@ go build
 if [ -f exeNetworkAccessController ];
 then
     echo "FH File found"
-    if [ -f $HOME/Documents/Temp/exeNetworkAccessController ];
+    if [ -f $HOME/Documents/Deploy/exeNetworkAccessController ];
     then
         echo "FH old removed"
-        rm -f $HOME/Documents/Temp/exeNetworkAccessController
+        rm -f $HOME/Documents/Deploy/exeNetworkAccessController
     fi
-    mv exeNetworkAccessController $HOME/Documents/Temp/exeNetworkAccessController
+    mv exeNetworkAccessController $HOME/Documents/Deploy/exeNetworkAccessController
 fi
