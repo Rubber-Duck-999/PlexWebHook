@@ -10,10 +10,10 @@ go build
 
 if [ -f exeNetworkAccessController ];
 then
-    echo "FH File found"
+    echo "NAC File found"
     if [ -f $HOME/Documents/Deploy/exeNetworkAccessController ];
     then
-        echo "FH old removed"
+        echo "NAC old removed"
         rm -f $HOME/Documents/Deploy/exeNetworkAccessController
     fi
     mv exeNetworkAccessController $HOME/Documents/Deploy/exeNetworkAccessController
