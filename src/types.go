@@ -26,7 +26,7 @@ type UserAdd struct {
 
 type RequestData struct {
 	GUID string `json:"guid"`
-	Request_id int `json:"request_id"`
+	Request_id int `json:"id"`
 	Time_from string `json:"time_from"`
 	Time_to string `json:"time_to"`
 	EventTypeId string `json:"event_type_id"`

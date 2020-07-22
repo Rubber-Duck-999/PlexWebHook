@@ -49,6 +49,8 @@ func dataInfoControl(data DataInfo) {
 			data_messages = append(data_messages, data)
 			_messages_done = true
 		}
+	} else {
+		log.Error("We received the wrong id for dataInfo")
 	}
 }
 

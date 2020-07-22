@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"math/rand"
 	"time"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -15,6 +16,7 @@ var _port string
 var _device_status string
 var _messages_done bool
 var _guid string
+var _sent bool
 
 type allData []DataInfo
 
@@ -22,6 +24,7 @@ var data_messages = allData{
 }
 
 func init() {
+	_sent = false
 	_port = "0"
 }
 
@@ -33,7 +36,7 @@ func SetGUID() {
         b[i] = letters[rand.Intn(len(letters))]
     }
 	_guid = string(b)
-	log.Debug("GUID set to: ", _guid)
+	log.Warn("GUID set to: ", _guid)
 }
 
 func SetPort(port string) {
@@ -42,10 +45,11 @@ func SetPort(port string) {
 }
 
 func isValidGUID(guid string) bool {
-	log.Warn("Valid GUID")
+	log.Warn("GUID Check")
 	if guid == _guid {
 		return true
 	}
+	log.Warn("InValid GUID")
 	return false
 }
 
@@ -100,37 +104,49 @@ func user_add(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func data_request(w http.ResponseWriter, r *http.Request) {
-	log.Warn("Received data message")
-	var request RequestData
-	req_body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
+func getData(w http.ResponseWriter, r *http.Request) {
+	log.Warn("Received data message:", r.URL.Query())
+
+	guid := r.URL.Query().Get("guid")
+	if guid == "" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
-	} else {
-		json.Unmarshal(req_body, &request)
-		if isValidGUID(request.GUID) && isValidRequest(request.Request_id) {
-			PublishRequestDatabase(request.Request_id, request.Time_from, 
-							request.Time_to, request.EventTypeId)
-			loop := 0
-			for _messages_done == false && loop < 4 {
-				time.Sleep(1 * time.Second)
-				loop++
-			}
-			if _messages_done {
-				w.WriteHeader(http.StatusOK)
-				json.NewEncoder(w).Encode(data_messages)
-			} else {
-				w.WriteHeader(http.StatusBadRequest)
-			}
+	}
+
+	string_id := r.URL.Query().Get("id")
+	id, err := strconv.Atoi(string_id)
+	if string_id == "" || err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if isValidGUID(guid) && isValidRequest(id) {
+		time_from  := r.URL.Query().Get("time_from")
+		time_to    := r.URL.Query().Get("time_to")
+		event_type := r.URL.Query().Get("event_type")
+		PublishRequestDatabase(id, time_from, time_to, event_type)
+		loop := 0
+		for _messages_done == false && loop < 3 {
+			time.Sleep(1 * time.Second)
+			log.Warn("Loop: ", loop)
+			loop++
+		}
+		if _messages_done {
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(data_messages)
 		} else {
 			w.WriteHeader(http.StatusBadRequest)
 		}
+	} else {
+		w.WriteHeader(http.StatusBadRequest)
 	}
 }
 
 func http_server() {
-	PublishGUIDUpdate(_guid)
+	if _sent == false {
+		PublishGUIDUpdate(_guid)
+		_sent = true
+	}
 	router := mux.NewRouter().StrictSlash(true)
 	// Set up of methods
 	router.HandleFunc("/device", device_add).Methods("POST")
@@ -141,7 +157,7 @@ func http_server() {
 	router.HandleFunc("/user", user_add).Methods("PATCH")
 	router.HandleFunc("/user", user_add).Methods("DELETE")	
 	//
-	router.HandleFunc("/data", data_request).Methods("GET")
+	router.HandleFunc("/data", getData).Methods("GET")
 	//	
 	log.Fatal(http.ListenAndServe(":" + _port, router))
 }

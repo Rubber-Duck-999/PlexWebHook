@@ -19,6 +19,7 @@ var current_id int
 func init() {
 	_, _, day := time.Now().Date()
 	log.Debug("Day currently: ", day)
+	current_id = 0
 }
 
 func SetCodes(pass string) {
@@ -203,16 +204,16 @@ func PublishFailureNetwork(time string, reason string) string {
 	}
 }
 
-func PublishRequestDatabase(id int, time_from string, time_to string, message string) string {
+func PublishRequestDatabase(id int, time_from string, time_to string, message string) {
 	request, err := json.Marshal(&RequestDatabase{
 		Request_id: id,
 		Time_from:  time_from,
 		Time_to:    time_to,
 		EventTypeId: message})
 	if err != nil {
-		return "Failed to convert RequestDatabase"
+		log.Error("Failed to convert RequestDatabase")
 	} else {
-		return Publish(request, REQUESTDATABASE)
+		log.Debug(Publish(request, REQUESTDATABASE))
 	}
 }
 
