@@ -105,7 +105,7 @@ func user_add(w http.ResponseWriter, r *http.Request) {
 }
 
 func getData(w http.ResponseWriter, r *http.Request) {
-	log.Warn("Received data message:", r.URL.Query())
+	log.Warn("Received data message: ", r.URL.Query())
 
 	guid := r.URL.Query().Get("guid")
 	if guid == "" {
