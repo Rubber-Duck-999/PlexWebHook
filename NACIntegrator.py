@@ -48,15 +48,25 @@ print("Waiting for notifications")
 count = 1
 
 def callback(ch, method, properties, body):
-    print("Received %r:%r" % (method.routing_key, body))
     str = body.decode()
-    print("NACIntegrator: I think we received a message: " + str)
     if method.routing_key == request_database:
+        print("NACIntegrator: I think we received a message: " + str)
         print("Request for data")
+        global count
         request = { 
             "_id": count, 
             "_messageNum": 1,
-            "_totalMessage": 1,
+            "_totalMessage": 2,
+            "_topicMessage": "EVM3",
+            "_timeSent": "12:00:30"
+        }
+        payload = json.dumps(request)
+        channel.basic_publish(exchange='topics', routing_key=data_info, body=payload)
+        print("Sent %r " % data_info)
+        request = { 
+            "_id": count, 
+            "_messageNum": 2,
+            "_totalMessage": 2,
             "_topicMessage": "EVM3",
             "_timeSent": "12:00:30"
         }

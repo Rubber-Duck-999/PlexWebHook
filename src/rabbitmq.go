@@ -14,12 +14,10 @@ var init_err error
 var password string
 var pinCode int
 var day int
-var current_id int
 
 func init() {
 	_, _, day := time.Now().Date()
 	log.Debug("Day currently: ", day)
-	current_id = 0
 }
 
 func SetCodes(pass string) {
