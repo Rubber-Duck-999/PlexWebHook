@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"io/ioutil"
-	"net/http"
 	"math/rand"
+	"net/http"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -20,8 +20,7 @@ var current_id int
 
 type allData []DataInfo
 
-var data_messages = allData{
-}
+var data_messages = allData{}
 
 func init() {
 	_sent = false
@@ -33,9 +32,9 @@ func SetGUID() {
 	rand.Seed(time.Now().UnixNano())
 
 	b := make([]rune, 10)
-    for i := range b {
-        b[i] = letters[rand.Intn(len(letters))]
-    }
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
 	_guid = string(b)
 	log.Warn("GUID set to: ", _guid)
 }
@@ -69,7 +68,7 @@ func device_add(w http.ResponseWriter, r *http.Request) {
 			_statusNAC.TimeEscConnected = getTime()
 			log.Debug("Received Device Name: ", device.Name)
 			PublishDeviceUpdate(device.Name, device.Mac,
-								device.Status, r.Method)
+				device.Status, r.Method)
 			w.WriteHeader(http.StatusOK)
 		}
 	}
@@ -109,8 +108,8 @@ func getData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	time_from  := r.URL.Query().Get("time_from")
-	time_to    := r.URL.Query().Get("time_to")
+	time_from := r.URL.Query().Get("time_from")
+	time_to := r.URL.Query().Get("time_to")
 	event_type := r.URL.Query().Get("event_type_id")
 	PublishRequestDatabase(current_id, time_from, time_to, event_type)
 	loop := 0
@@ -141,9 +140,9 @@ func http_server() {
 	//
 	router.HandleFunc("/user", user_add).Methods("POST")
 	router.HandleFunc("/user", user_add).Methods("PATCH")
-	router.HandleFunc("/user", user_add).Methods("DELETE")	
+	router.HandleFunc("/user", user_add).Methods("DELETE")
 	//
 	router.HandleFunc("/data", getData).Methods("GET")
-	//	
-	log.Fatal(http.ListenAndServe(":" + _port, router))
+	//
+	log.Fatal(http.ListenAndServe(":"+_port, router))
 }

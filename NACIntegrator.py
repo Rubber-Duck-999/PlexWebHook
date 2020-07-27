@@ -56,7 +56,7 @@ def callback(ch, method, properties, body):
         request = { 
             "_id": count, 
             "_messageNum": 1,
-            "_totalMessage": 2,
+            "_totalMessage": 1,
             "_topicMessage": "EVM3",
             "_timeSent": "12:00:30"
         }
@@ -71,7 +71,7 @@ def callback(ch, method, properties, body):
             "_timeSent": "12:00:30"
         }
         payload = json.dumps(request)
-        channel.basic_publish(exchange='topics', routing_key=data_info, body=payload)
+        #channel.basic_publish(exchange='topics', routing_key=data_info, body=payload)
         print("Sent %r " % data_info)
         count = count + 1
     
