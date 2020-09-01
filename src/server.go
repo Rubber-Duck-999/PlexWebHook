@@ -40,7 +40,7 @@ func SetGUID() {
 }
 
 func SetPort(port string) {
-	log.Debug("Port set")
+	log.Warn("Port set: ", port)
 	_port = port
 }
 
@@ -132,6 +132,7 @@ func http_server() {
 		PublishGUIDUpdate(_guid)
 		_sent = true
 	}
+	log.Warn("Starting Server")
 	router := mux.NewRouter().StrictSlash(true)
 	// Set up of methods
 	router.HandleFunc("/device", device_add).Methods("POST")
@@ -144,5 +145,5 @@ func http_server() {
 	//
 	router.HandleFunc("/data", getData).Methods("GET")
 	//
-	log.Fatal(http.ListenAndServe(":"+_port, router))
+	log.Warn(http.ListenAndServe(":"+_port, router))
 }
