@@ -1,6 +1,6 @@
 # HouseGuard-NetworkAccessController
 
-[![codebeat badge](https://codebeat.co/badges/6b6f2a2f-d108-4557-825d-7c1f4ca148f2)](https://codebeat.co/projects/github-com-rubber-duck-999-houseguard-networkaccesscontroller-master)
+![Go](https://github.com/Rubber-Duck-999/HouseGuard-NetworkAccessController/workflows/Go/badge.svg)
 
 HouseGuard-NetworkAccessController is the largest interface based component, it manages the iptables rules and frequently checks unknown comms as well dealing with ESC for passing data to and fro on the system.
 
