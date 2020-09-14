@@ -85,7 +85,8 @@ func user_add(w http.ResponseWriter, r *http.Request) {
 		if isValidGUID(user.GUID) {
 			_statusNAC.TimeEscConnected = getTime()
 			log.Debug("Received User Name: ", user.User)
-			//PublishUserUpdate(user.User, user.Pin, r.Method)
+			PublishUserUpdate(user.User, user.Role, user.Email,
+				user.Pin, r.Method)
 			w.WriteHeader(http.StatusOK)
 		} else {
 			log.Error("Invalid GUID")

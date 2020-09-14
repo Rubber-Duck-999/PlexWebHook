@@ -61,7 +61,7 @@ func messages(routing_key string, value string) {
 	}
 }
 
-func SetConnection() error{
+func SetConnection() error {
 	conn, init_err = amqp.Dial("amqp://guest:" + password + "@localhost:5672/")
 	failOnError(init_err, "Failed to connect to RabbitMQ")
 
@@ -153,7 +153,7 @@ func Publish(message []byte, routingKey string) string {
 		log.Debug(string(message))
 		err := ch.Publish(
 			EXCHANGENAME, // exchange
-			routingKey,      // routing key
+			routingKey,   // routing key
 			false,        // mandatory
 			false,        // immediate
 			amqp.Publishing{
@@ -170,10 +170,10 @@ func Publish(message []byte, routingKey string) string {
 
 func PublishEventNAC(message string, time string, event_type_id string) string {
 	eventNAC, err := json.Marshal(&EventNAC{
-		Component:    COMPONENT,
-		Message:      message,
-		Time:         time,
-		EventTypeId:  event_type_id})
+		Component:   COMPONENT,
+		Message:     message,
+		Time:        time,
+		EventTypeId: event_type_id})
 	if err != nil {
 		return "Failed to convert EventNAC"
 	} else {
@@ -204,9 +204,9 @@ func PublishFailureNetwork(time string, reason string) string {
 
 func PublishRequestDatabase(id int, time_from string, time_to string, message string) {
 	request, err := json.Marshal(&RequestDatabase{
-		Request_id: id,
-		Time_from:  time_from,
-		Time_to:    time_to,
+		Request_id:  id,
+		Time_from:   time_from,
+		Time_to:     time_to,
 		EventTypeId: message})
 	if err != nil {
 		log.Error("Failed to convert RequestDatabase")
@@ -219,7 +219,7 @@ func PublishDeviceFound(name string, address string, status int) string {
 	device, err := json.Marshal(&DeviceFoundTopic{
 		Device_name: name,
 		Ip_address:  address,
-		Status: status})
+		Status:      status})
 	if err != nil {
 		return "Failed to convert DeviceFound"
 	} else {
@@ -230,8 +230,8 @@ func PublishDeviceFound(name string, address string, status int) string {
 func PublishDeviceRequest(id uint32, name string, mac string) string {
 	device, err := json.Marshal(&DeviceRequest{
 		Request_id: id,
-		Name: name,
-		Mac: mac})
+		Name:       name,
+		Mac:        mac})
 	if err != nil {
 		return "Failed to convert DeviceRequest"
 	} else {
@@ -241,10 +241,10 @@ func PublishDeviceRequest(id uint32, name string, mac string) string {
 
 func PublishDeviceUpdate(name string, mac string, status string, state string) string {
 	device, err := json.Marshal(&DeviceUpdate{
-		Name: name,
-		Mac: mac,
+		Name:   name,
+		Mac:    mac,
 		Status: status,
-		State: state})
+		State:  state})
 	if err != nil {
 		return "Failed to convert DeviceUpdate"
 	} else {
@@ -252,10 +252,24 @@ func PublishDeviceUpdate(name string, mac string, status string, state string) s
 	}
 }
 
+func PublishUserUpdate(username string, role string, email string, pincode string, state string) string {
+	user, err := json.Marshal(&UserUpdate{
+		Username: username,
+		Role:     role,
+		Email:    email,
+		Pincode:  pincode,
+		State:    state})
+	if err != nil {
+		return "Failed to convert UserUpdate"
+	} else {
+		return Publish(user, USERUPDATE)
+	}
+}
+
 func PublishUnauthorisedConnection(mac string, time string, alive bool) string {
 	connection, err := json.Marshal(&UnauthorisedConnection{
-		Mac:  mac,
-		Time: time,
+		Mac:   mac,
+		Time:  time,
 		Alive: alive})
 	if err != nil {
 		return "Failed to convert UnauthorisedConnection"
