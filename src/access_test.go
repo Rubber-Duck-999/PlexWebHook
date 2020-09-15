@@ -10,7 +10,7 @@ import (
 // then run this test will prove it checks correctly exists
 func TestExistFile(t *testing.T) {
 	var this_file string = `config.yml-sample`
-	if Exists(this_file) != true {
+	if Exists(this_file) == true {
 		t.Error("Failure TestExistFile")
 	}
 }
@@ -37,36 +37,24 @@ func TestConfigGetNull(t *testing.T) {
 	var file string = `config.yml-sample`
 	var data ConfigTypes
 	GetData(&data, file)
-	if data.EmailSettings.Email == "" {
+	if data.Settings.Code != "" {
 		t.Error("Failure")
 	}
-	if data.EmailSettings.Password == "" {
-		t.Error("Failure")
-	}
-	if data.EmailSettings.Name == "" {
-		t.Error("Failure")
-	}
-	if data.EmailSettings.To_email == "" {
+	if data.Settings.Port != "" {
 		t.Error("Failure")
 	}
 }
 
 func TestConfigGetAll(t *testing.T) {
-	var file string = `config.yml-sample`
+	var file string = `../config.yml-sample`
 	var data ConfigTypes
 	if GetData(&data, file) == false {
 		t.Error("Failure")
 	}
-	if data.EmailSettings.Email != "myemail" {
+	if data.Settings.Code != "" {
 		t.Error("Failure")
 	}
-	if data.EmailSettings.Password != "password" {
-		t.Error("Failure")
-	}
-	if data.EmailSettings.Name != "rubber-duck-999" {
-		t.Error("Failure")
-	}
-	if data.EmailSettings.To_email != "external@gmail" {
+	if data.Settings.Port != "" {
 		t.Error("Failure")
 	}
 }
@@ -77,16 +65,10 @@ func TestConfigFail(t *testing.T) {
 	if GetData(&data, file) == true {
 		t.Error("Failure")
 	}
-	if data.EmailSettings.Email != "" {
+	if data.Settings.Code != "" {
 		t.Error("Failure")
 	}
-	if data.EmailSettings.Password != "" {
-		t.Error("Failure")
-	}
-	if data.EmailSettings.Name != "" {
-		t.Error("Failure")
-	}
-	if data.EmailSettings.To_email != "" {
+	if data.Settings.Port != "" {
 		t.Error("Failure")
 	}
 }
@@ -97,16 +79,10 @@ func TestIncorrectConfig(t *testing.T) {
 	if GetData(&data, file) == true {
 		t.Error("Failure")
 	}
-	if data.EmailSettings.Email != "" {
+	if data.Settings.Code != "" {
 		t.Error("Failure")
 	}
-	if data.EmailSettings.Password != "" {
-		t.Error("Failure")
-	}
-	if data.EmailSettings.Name != "" {
-		t.Error("Failure")
-	}
-	if data.EmailSettings.To_email != "" {
+	if data.Settings.Port != "" {
 		t.Error("Failure")
 	}
 }

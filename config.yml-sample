@@ -1,2 +1,3 @@
 settings:
-  code: 9999
+  code: "9999"
+  port: "0000"

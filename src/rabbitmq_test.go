@@ -7,20 +7,6 @@ import (
 	"testing"
 )
 
-// Check that State is set
-// then run this test will prove it is set
-func TestPublishFailRabbit(t *testing.T) {
-	failure := "cheese"
-	failure = messageFailure(true)
-	if failure != "" {
-		if strings.Contains(FAILUREPUBLISH, failure) {
-			t.Error("Failure")
-		} else if strings.Contains(FAILURECONVERT, failure) {
-			t.Error("Failure")
-		}
-	}
-}
-
 func TestLogicNetwork(t *testing.T) {
 	value := "{ 'time': 12:00:34, 'type': 'Camera', 'severity': 3 }"
 	messages(FAILURENETWORK, value)
@@ -39,7 +25,7 @@ func TestLogicNotExpected(t *testing.T) {
 	checkState()
 	if SubscribedMessagesMap[1].valid == true {
 		t.Error("Failure")
-	} else if SubscribedMessagesMap[1].routing_key == EVENTFH {
+	} else if SubscribedMessagesMap[1].routing_key == EVENTNAC {
 		t.Log(SubscribedMessagesMap[1].routing_key)
 		t.Error("Failure")
 	}
@@ -56,7 +42,6 @@ func TestLogicValid(t *testing.T) {
 	}
 }
 
-
 func TestGetTime(t *testing.T) {
 	time := getTime()
 	if !strings.Contains(time, "2020") {
@@ -70,12 +55,3 @@ func TestGetTimeFail(t *testing.T) {
 		t.Error("Failure")
 	}
 }
-
-func TestEventNAC(t *testing.T) {
-	valid := PublishEventNAC (COMPONENT, UPDATESTATEERROR, getTime())
-	if valid != "" {
-		t.Error("Failure")
-	}
-}
-
-
