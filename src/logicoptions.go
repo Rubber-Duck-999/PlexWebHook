@@ -20,18 +20,20 @@ func convertStatus(status string) int {
 }
 
 func deviceResponse(request_id uint32) {
-	if DevicesList[request_id].Allowed == BLOCKED ||
-		DevicesList[request_id].Allowed == UNKNOWN {
+	if DevicesList[request_id].Allowed == BLOCKED {
 		PublishDeviceFound(DevicesList[request_id].Device_name,
 			DevicesList[request_id].Ip_address,
 			DevicesList[request_id].Allowed)
+		PublishEventNAC(getTime(), "NAC2")
 	} else if DevicesList[request_id].Allowed == DISCOVERED {
 		log.Error("DBM did not send us a correct status")
 	} else if DevicesList[request_id].Allowed == ALLOWED {
 		log.Trace("Device is allowed")
 	} else if DevicesList[request_id].Allowed == UNKNOWN {
-		PublishEventNAC(UNKNOWN_DEVICE+DevicesList[request_id].Mac,
-			getTime(), "NAC3")
+		PublishDeviceFound(DevicesList[request_id].Device_name,
+			DevicesList[request_id].Ip_address,
+			DevicesList[request_id].Allowed)
+		PublishEventNAC(getTime(), "NAC3")
 	} else {
 		log.Error("We shouldn't hit this error")
 		log.Error("Allowed status: ", DevicesList[request_id].Allowed)

@@ -168,10 +168,9 @@ func Publish(message []byte, routingKey string) string {
 	return ""
 }
 
-func PublishEventNAC(message string, time string, event_type_id string) string {
+func PublishEventNAC(time string, event_type_id string) string {
 	eventNAC, err := json.Marshal(&EventNAC{
 		Component:   COMPONENT,
-		Message:     message,
 		Time:        time,
 		EventTypeId: event_type_id})
 	if err != nil {
