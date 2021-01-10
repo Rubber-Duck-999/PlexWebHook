@@ -3,70 +3,15 @@ package main
 type ConfigTypes struct {
 	Settings struct {
 		Code string `yaml:"code"`
-		Port string `yaml:"port"`
+		Url string `yaml:"endpoint"`
 	} `yaml:"settings"`
 }
-
-// ESC Messages
-
-type DeviceAdd struct {
-	GUID       string `json:"guid"`
-	Request_id int    `json:"request_id"`
-	Name       string `json:"name"`
-	Mac        string `json:"mac"`
-	Status     string `json:"status"`
-}
-
-type UserAdd struct {
-	GUID       string `json:"guid"`
-	Request_id int    `json:"request_id"`
-	User       string `json:"user"`
-	Role       string `json:"role"`
-	Email      string `json:email"`
-	Pin        string `json:"pin"`
-}
-
-type RequestData struct {
-	GUID        string `json:"guid"`
-	Request_id  int    `json:"id"`
-	Time_from   string `json:"time_from"`
-	Time_to     string `json:"time_to"`
-	EventTypeId string `json:"event_type_id"`
-}
-
-// End of ESC messages
 
 type FailureNetwork struct {
 	Time         string `json:"time"`
 	Failure_type string `json:"type_of_failure"`
 }
 
-type RequestDatabase struct {
-	Request_id  int    `json:"request_id"`
-	Time_from   string `json:"time_from"`
-	Time_to     string `json:"time_to"`
-	EventTypeId string `json:"event_type_id"`
-}
-
-type DataInfo struct {
-	Id            int    `json:"_id"`
-	Message_num   int    `json:"_messageNum"`
-	Total_message int    `json:"_totalMessage"`
-	Message       string `json:"_topicMessage"`
-	Time          string `json:"_timeSent"`
-}
-
-type UnauthorisedConnection struct {
-	Mac   string `json:"mac"`
-	Time  string `json:"time"`
-	Alive bool   `json:"alive"`
-}
-
-type EventNAC struct {
-	Component   string `json:"component"`
-	Time        string `json:"time"`
-	EventTypeId string `json:"event_type_id"`
-}
 
 type ApiResponse struct {
 	Vendor string `json:"Vendor"`
@@ -94,21 +39,6 @@ type DeviceFoundTopic struct {
 	Status      int    `json:"status"`
 }
 
-type UserUpdate struct {
-	Username string `json:"username"`
-	Role     string `json:"role"`
-	Email    string `json:"email"`
-	Pincode  string `json:"pincode"`
-	State    string `json:"state"`
-}
-
-type DeviceUpdate struct {
-	Name   string `json:"name"`
-	Mac    string `json:"mac"`
-	Status string `json:"status"`
-	State  string `json:"state"`
-}
-
 type DeviceRequest struct {
 	Request_id uint32 `json:"id"`
 	Name       string `json:"name"`
@@ -122,37 +52,74 @@ type DeviceResponse struct {
 	Status     string `json:"status"`
 }
 
+// Alarm Event
+type AlarmEvent struct {
+	User   string `json:"user"`
+	State  string `json:"state"`
+}
+
+// Daily Status
+type DailyStatus struct {
+	CreatedDate string
+	Allowed     int
+	Blocked     int
+	Unknown     int
+	TotalEvents int
+	CommonEvent string
+	TotalFaults int
+	CommonFault string
+}
+
+// Status
+type Status struct {
+	CreatedDate    string
+	MotionDetected string
+	AccessGranted  string
+	AccessDenied   string
+	LastFault      string
+	LastUser       string
+	CPUTemp        int
+	CPUUsage       int
+	Memory         int
+}
+
+type StatusSYP struct {
+	Temperature  int `json:"temperature"`
+	MemoryLeft   int `json:"memory_left"`
+	HighestUsage int `json:"highest_usage"`
+}
+
+type StatusFH struct {
+	DailyFaults  int    `json:"daily_faults"`
+	CommonFaults string `json:"common_faults"`
+}
+
 type StatusNAC struct {
 	DevicesActive       int    `json:"devices_active"`
 	DailyBlockedDevices int    `json:"blocked"`
 	DailyUnknownDevices int    `json:"unknown"`
 	DailyAllowedDevices int    `json:"allowed"`
-	TimeEscConnected    string `json:"time"`
+}
+type StatusUP struct {
+	LastAccessGranted string `json:"_accessGranted"`
+	LastAccessBlocked string `json:"_accessblocked"`
+	CurrentAlarmState string `json:"_state"`
+	LastUser          string `json:"_user"`
 }
 
-type GUIDUpdate struct {
-	GUID string `json:"guid"`
-}
-
-//Topics
-const REQUESTDATA string = "Request.Data"
-const AUTHENTICATIONREQUEST string = "Authentication.Request"
-const DATAINFO string = "Data.Info"
-const DEVICEADD string = "Device.Add"
-const DEVICERESPONSE string = "Device.Response"
-
+const STATUSSYP string = "Status.SYP"
+const STATUSFH string = "Status.FH"
+const STATUSNAC string = "Status.NAC"
+const STATUSUP string = "Status.UP"
+const STATUSALL string = "Status.*"
+const STATUSREQUESTUP string = "Status.Request.UP"
 //
+const DEVICERESPONSE string = "Device.Response"
 const FAILURENETWORK string = "Failure.Network"
-const EVENTNAC string = "Event.NAC"
-const REQUESTDATABASE string = "Request.Database"
-const DATARESPONSE string = "Data.Response"
 const DEVICEFOUND string = "Device.Found"
 const AUTHENTICATIONRESPONSE string = "Authentication.Response"
 const UNAUTHORISEDCONNECTION string = "Unauthorised.Connection"
 const DEVICEREQUEST string = "Device.Request"
-const DEVICEUPDATE string = "Device.Update"
-const USERUPDATE string = "User.Update"
-const STATUSNAC string = "Status.NAC"
 
 //
 const ACCESSFAIL string = "FAIL"

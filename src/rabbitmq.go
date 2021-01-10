@@ -15,7 +15,37 @@ var password string
 var pinCode int
 var day int
 
+//Status
+var _statusSYP StatusSYP
+var _statusFH StatusFH
+var _statusNAC StatusNAC
+var _statusUP StatusUP
+
+//
+
 func init() {
+	log.Trace("Initialised rabbitmq package")
+	_statusSYP = StatusSYP{
+		Temperature:  0,
+		MemoryLeft:   0,
+		HighestUsage: 0}
+
+	_statusFH = StatusFH{
+		DailyFaults:  0,
+		CommonFaults: "N/A"}
+
+	_statusNAC = StatusNAC{
+		DevicesActive:       0,
+		DailyBlockedDevices: 0,
+		DailyUnknownDevices: 0,
+		DailyAllowedDevices: 0}
+
+	_statusUP = StatusUP{
+		LastAccessGranted: "N/A",
+		LastAccessBlocked: "N/A",
+		CurrentAlarmState: "OFF",
+		LastUser:          "N/A"}
+
 	_, _, day := time.Now().Date()
 	log.Debug("Day currently: ", day)
 }
@@ -75,8 +105,7 @@ func Subscribe() {
 
 	DevicesList = make(map[uint32]*Device)
 	if init == nil {
-		var topics = [2]string{
-			DATAINFO,
+		var topics = [1]string{
 			DEVICERESPONSE,
 		}
 
@@ -141,10 +170,23 @@ func Subscribe() {
 
 		go checkDevices()
 
-		go http_server()
+		go StatusCheck()
 
 		log.Trace(" [*] Waiting for logs. To exit press CTRL+C")
 		<-forever
+	}
+}
+
+func StatusCheck() {
+	done := false
+	for {
+		if !done {
+			PublishStatusRequest()
+			done = true
+		} else {
+			done = false
+		}
+		time.Sleep(15 * time.Minute)
 	}
 }
 
@@ -168,26 +210,12 @@ func Publish(message []byte, routingKey string) string {
 	return ""
 }
 
-func PublishEventNAC(time string, event_type_id string) string {
-	eventNAC, err := json.Marshal(&EventNAC{
-		Component:   COMPONENT,
-		Time:        time,
-		EventTypeId: event_type_id})
-	if err != nil {
-		return "Failed to convert EventNAC"
-	} else {
-		return Publish(eventNAC, EVENTNAC)
-	}
-}
-
-func PublishGUIDUpdate(guid string) string {
-	update, err := json.Marshal(&GUIDUpdate{
-		GUID: guid})
-	if err != nil {
-		return "Failed to convert GUID.Update"
-	} else {
-		return Publish(update, EVENTNAC)
-	}
+func PublishStatusRequest() {
+	log.Debug("Publishing Status Request")
+	message, _ := json.Marshal(&FailureNetwork{
+		Time: "",
+		Failure_type: ""})
+	Publish(message, STATUSREQUESTUP)
 }
 
 func PublishFailureNetwork(time string, reason string) string {
@@ -198,19 +226,6 @@ func PublishFailureNetwork(time string, reason string) string {
 		return "Failed to convert FailureNetwork"
 	} else {
 		return Publish(failureNetwork, FAILURENETWORK)
-	}
-}
-
-func PublishRequestDatabase(id int, time_from string, time_to string, message string) {
-	request, err := json.Marshal(&RequestDatabase{
-		Request_id:  id,
-		Time_from:   time_from,
-		Time_to:     time_to,
-		EventTypeId: message})
-	if err != nil {
-		log.Error("Failed to convert RequestDatabase")
-	} else {
-		log.Debug(Publish(request, REQUESTDATABASE))
 	}
 }
 
@@ -238,44 +253,6 @@ func PublishDeviceRequest(id uint32, name string, mac string) string {
 	}
 }
 
-func PublishDeviceUpdate(name string, mac string, status string, state string) string {
-	device, err := json.Marshal(&DeviceUpdate{
-		Name:   name,
-		Mac:    mac,
-		Status: status,
-		State:  state})
-	if err != nil {
-		return "Failed to convert DeviceUpdate"
-	} else {
-		return Publish(device, DEVICEUPDATE)
-	}
-}
-
-func PublishUserUpdate(username string, role string, email string, pincode string, state string) string {
-	user, err := json.Marshal(&UserUpdate{
-		Username: username,
-		Role:     role,
-		Email:    email,
-		Pincode:  pincode,
-		State:    state})
-	if err != nil {
-		return "Failed to convert UserUpdate"
-	} else {
-		return Publish(user, USERUPDATE)
-	}
-}
-
-func PublishUnauthorisedConnection(mac string, time string, alive bool) string {
-	connection, err := json.Marshal(&UnauthorisedConnection{
-		Mac:   mac,
-		Time:  time,
-		Alive: alive})
-	if err != nil {
-		return "Failed to convert UnauthorisedConnection"
-	} else {
-		return Publish(connection, UNAUTHORISEDCONNECTION)
-	}
-}
 
 func PublishStatusNAC() string {
 	converted, err := json.Marshal(&_statusNAC)

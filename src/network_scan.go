@@ -21,16 +21,6 @@ const (
 
 // Default to listen on all IPv4 interfaces
 var ListenAddr = "0.0.0.0"
-var _statusNAC StatusNAC
-
-func init() {
-	_statusNAC = StatusNAC{
-		DevicesActive:       0,
-		DailyBlockedDevices: 0,
-		DailyUnknownDevices: 0,
-		DailyAllowedDevices: 0,
-		TimeEscConnected:    "N/A"}
-}
 
 func runARP() {
 	log.Debug("### Running ARP ###")
@@ -105,14 +95,12 @@ func nmap_scan() {
 		nmap.WithContext(ctx),
 	)
 	if err != nil {
-		PublishEventNAC(getTime(), "NAC1")
 		log.Error("Unable to create nmap scanner: ", err)
 	}
 
 	result, warnings, err := scanner.Run()
 	if err != nil {
 		log.Error("Unable to run nmap scan: ", err)
-		PublishEventNAC(getTime(), "NAC1")
 	}
 
 	if warnings != nil {
