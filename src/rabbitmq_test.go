@@ -25,7 +25,7 @@ func TestLogicNotExpected(t *testing.T) {
 	checkState()
 	if SubscribedMessagesMap[1].valid == true {
 		t.Error("Failure")
-	} else if SubscribedMessagesMap[1].routing_key == EVENTNAC {
+	} else if SubscribedMessagesMap[1].routing_key == ALARMEVENT {
 		t.Log(SubscribedMessagesMap[1].routing_key)
 		t.Error("Failure")
 	}
@@ -36,7 +36,7 @@ func TestLogicValid(t *testing.T) {
 	messages("Event.DBM", value)
 	if SubscribedMessagesMap[2].valid == false {
 		t.Error("Failure")
-	} else if SubscribedMessagesMap[2].routing_key == EVENTNAC {
+	} else if SubscribedMessagesMap[2].routing_key == ALARMEVENT {
 		t.Log(SubscribedMessagesMap[2].routing_key)
 		t.Error("Failure")
 	}
@@ -44,14 +44,14 @@ func TestLogicValid(t *testing.T) {
 
 func TestGetTime(t *testing.T) {
 	time := getTime()
-	if !strings.Contains(time, "2020") {
+	if !strings.Contains(time, "2021") {
 		t.Error("Failure")
 	}
 }
 
 func TestGetTimeFail(t *testing.T) {
 	time := getTime()
-	if strings.Contains(time, ":") {
+	if !strings.Contains(time, ":") {
 		t.Error("Failure")
 	}
 }

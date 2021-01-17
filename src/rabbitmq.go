@@ -105,8 +105,12 @@ func Subscribe() {
 
 	DevicesList = make(map[uint32]*Device)
 	if init == nil {
-		var topics = [1]string{
+		var topics = [5]string{
 			DEVICERESPONSE,
+			STATUSSYP,
+			STATUSFH,
+			STATUSUP,
+			ALARMEVENT,
 		}
 
 		err := ch.ExchangeDeclare(
@@ -192,7 +196,6 @@ func StatusCheck() {
 
 func Publish(message []byte, routingKey string) string {
 	if init_err == nil {
-		log.Debug(string(message))
 		err := ch.Publish(
 			EXCHANGENAME, // exchange
 			routingKey,   // routing key
@@ -213,7 +216,7 @@ func Publish(message []byte, routingKey string) string {
 func PublishStatusRequest() {
 	log.Debug("Publishing Status Request")
 	message, _ := json.Marshal(&FailureNetwork{
-		Time: "",
+		Time:         "",
 		Failure_type: ""})
 	Publish(message, STATUSREQUESTUP)
 }
@@ -230,7 +233,7 @@ func PublishFailureNetwork(time string, reason string) string {
 }
 
 func PublishDeviceFound(name string, address string, status int) string {
-	device, err := json.Marshal(&DeviceFoundTopic{
+	device, err := json.Marshal(&DeviceFound{
 		Device_name: name,
 		Ip_address:  address,
 		Status:      status})
@@ -250,15 +253,5 @@ func PublishDeviceRequest(id uint32, name string, mac string) string {
 		return "Failed to convert DeviceRequest"
 	} else {
 		return Publish(device, DEVICEREQUEST)
-	}
-}
-
-
-func PublishStatusNAC() string {
-	converted, err := json.Marshal(&_statusNAC)
-	if err != nil {
-		return "Failed to convert StatusNAC"
-	} else {
-		return Publish(converted, STATUSNAC)
 	}
 }

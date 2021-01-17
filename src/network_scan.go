@@ -144,15 +144,9 @@ func stateDevices(id uint32) {
 }
 
 func checkDevices() {
-	done := false
 	for {
-		if done == false {
-			nmap_scan()
-			runARP()
-			done = true
-		} else {
-			done = false
-		}
+		nmap_scan()
+		runARP()
 		log.Warn("### Devices ###")
 		_statusNAC.DevicesActive = 0
 		_statusNAC.DailyAllowedDevices = 0
@@ -170,10 +164,7 @@ func checkDevices() {
 			}
 		}
 		log.Debug("### End of ARP ###")
-		log.Debug("Starting Status NAC publish")
-		log.Debug("Current message : ", _statusNAC)
-		log.Debug("### End of Status ###")
-		PublishStatusNAC()
+		log.Debug("Current StatusNac: ", _statusNAC)
 		time.Sleep(4 * time.Minute)
 	}
 }

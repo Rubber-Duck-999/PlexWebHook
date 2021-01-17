@@ -4,8 +4,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strings"
 	"strconv"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -37,7 +37,7 @@ func apiCall(req *http.Request) bool {
 
 func driveUpdateStatus() {
 	t := time.Now()
- 
+
 	h := t.Hour()
 	m := t.Minute()
 	s := t.Second()
@@ -47,14 +47,13 @@ func driveUpdateStatus() {
 			postDailyStatus()
 		}
 	}
-	if m == 1 {
+	if m%6 == 0 {
 		log.Debug("Posting status")
 		postStatus()
-		time.Sleep(2 * time.Minute)
 	}
 }
 
-func postAlarmEvent(event AlarmEvent) {
+func postAlarmEvent(event AlarmEvent) bool {
 	q := url.Values{}
 	q.Add("user", "User")
 	q.Add("state", "OFF")
@@ -62,10 +61,12 @@ func postAlarmEvent(event AlarmEvent) {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	if apiCall(req) {
 		log.Debug("Request Successful")
+		return true
 	} else {
 		log.Error("Request Failed on POST AlarmEvent")
-		time_string := time.Now().String()
-		PublishFailureNetwork(time_string, "AlarmEvent")
+		timeString := time.Now().String()
+		PublishFailureNetwork(timeString, "AlarmEvent")
+		return false
 	}
 }
 
@@ -74,9 +75,9 @@ func postStatus() {
 	t := time.Now()
 	q.Add("created_date", t.Format("2006-01-02"))
 	q.Add("motion_detected", "")
-	q.Add("access_granted", "")
+	q.Add("access_granted", _statusUP.LastAccessGranted)
 	q.Add("access_denied", _statusUP.LastAccessBlocked)
-	q.Add("last_fault", "N/A")
+	q.Add("last_fault", "")
 	q.Add("last_user", _statusUP.LastUser)
 	q.Add("cpu_temp", strconv.Itoa(_statusSYP.Temperature))
 	q.Add("cpu_usage", strconv.Itoa(_statusSYP.HighestUsage))
@@ -87,8 +88,8 @@ func postStatus() {
 		log.Debug("Request Successful")
 	} else {
 		log.Error("Request Failed on POST Status")
-		time_string := time.Now().String()
-		PublishFailureNetwork(time_string, "Status")
+		timeString := time.Now().String()
+		PublishFailureNetwork(timeString, "Status")
 	}
 }
 
@@ -109,7 +110,7 @@ func postDailyStatus() {
 		log.Debug("Request Successful")
 	} else {
 		log.Error("Request Failed on POST DailyStatus")
-		time_string := time.Now().String()
-		PublishFailureNetwork(time_string, "Daily Status")
+		timeString := time.Now().String()
+		PublishFailureNetwork(timeString, "Daily Status")
 	}
 }

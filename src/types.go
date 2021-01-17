@@ -3,7 +3,7 @@ package main
 type ConfigTypes struct {
 	Settings struct {
 		Code string `yaml:"code"`
-		Url string `yaml:"endpoint"`
+		Url  string `yaml:"endpoint"`
 	} `yaml:"settings"`
 }
 
@@ -11,7 +11,6 @@ type FailureNetwork struct {
 	Time         string `json:"time"`
 	Failure_type string `json:"type_of_failure"`
 }
-
 
 type ApiResponse struct {
 	Vendor string `json:"Vendor"`
@@ -33,7 +32,7 @@ type Device struct {
 	New         bool   `json:"new"`
 }
 
-type DeviceFoundTopic struct {
+type DeviceFound struct {
 	Device_name string `json:"name"`
 	Ip_address  string `json:"address"`
 	Status      int    `json:"status"`
@@ -54,8 +53,8 @@ type DeviceResponse struct {
 
 // Alarm Event
 type AlarmEvent struct {
-	User   string `json:"user"`
-	State  string `json:"state"`
+	User  string `json:"user"`
+	State string `json:"state"`
 }
 
 // Daily Status
@@ -95,10 +94,10 @@ type StatusFH struct {
 }
 
 type StatusNAC struct {
-	DevicesActive       int    `json:"devices_active"`
-	DailyBlockedDevices int    `json:"blocked"`
-	DailyUnknownDevices int    `json:"unknown"`
-	DailyAllowedDevices int    `json:"allowed"`
+	DevicesActive       int `json:"devices_active"`
+	DailyBlockedDevices int `json:"blocked"`
+	DailyUnknownDevices int `json:"unknown"`
+	DailyAllowedDevices int `json:"allowed"`
 }
 type StatusUP struct {
 	LastAccessGranted string `json:"_accessGranted"`
@@ -109,16 +108,16 @@ type StatusUP struct {
 
 const STATUSSYP string = "Status.SYP"
 const STATUSFH string = "Status.FH"
-const STATUSNAC string = "Status.NAC"
 const STATUSUP string = "Status.UP"
 const STATUSALL string = "Status.*"
+const STATUS string = "Status."
 const STATUSREQUESTUP string = "Status.Request.UP"
+
 //
 const DEVICERESPONSE string = "Device.Response"
 const FAILURENETWORK string = "Failure.Network"
 const DEVICEFOUND string = "Device.Found"
-const AUTHENTICATIONRESPONSE string = "Authentication.Response"
-const UNAUTHORISEDCONNECTION string = "Unauthorised.Connection"
+const ALARMEVENT string = "Alarm.Event"
 const DEVICEREQUEST string = "Device.Request"
 
 //
@@ -127,7 +126,6 @@ const ACCESSPASS string = "PASS"
 const EXCHANGENAME string = "topics"
 const EXCHANGETYPE string = "topic"
 const TIMEFORMAT string = "2006/01/02 15:04:05"
-const COMPONENT string = "NAC"
 const FAILUREPUBLISH string = "Failed to publish"
 const UNKNOWN_DEVICE string = "New device connected - "
 

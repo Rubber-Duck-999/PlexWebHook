@@ -40,7 +40,7 @@ func TestConfigGetNull(t *testing.T) {
 	if data.Settings.Code != "" {
 		t.Error("Failure")
 	}
-	if data.Settings.Port != "" {
+	if data.Settings.Url != "" {
 		t.Error("Failure")
 	}
 }
@@ -51,10 +51,7 @@ func TestConfigGetAll(t *testing.T) {
 	if GetData(&data, file) == false {
 		t.Error("Failure")
 	}
-	if data.Settings.Code != "" {
-		t.Error("Failure")
-	}
-	if data.Settings.Port != "" {
+	if data.Settings.Code == "" {
 		t.Error("Failure")
 	}
 }
@@ -68,7 +65,7 @@ func TestConfigFail(t *testing.T) {
 	if data.Settings.Code != "" {
 		t.Error("Failure")
 	}
-	if data.Settings.Port != "" {
+	if data.Settings.Url != "" {
 		t.Error("Failure")
 	}
 }
@@ -82,7 +79,7 @@ func TestIncorrectConfig(t *testing.T) {
 	if data.Settings.Code != "" {
 		t.Error("Failure")
 	}
-	if data.Settings.Port != "" {
+	if data.Settings.Url != "" {
 		t.Error("Failure")
 	}
 }
