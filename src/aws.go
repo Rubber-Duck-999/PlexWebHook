@@ -17,10 +17,12 @@ func setEndpoint(endpoint string) {
 	_endpoint = endpoint
 }
 
-func apiCall(req *http.Request) bool {
+func apiCall(q string, name string) {
 	call_allowed := true
 	client := http.Client{}
 	if call_allowed {
+		req, _ := http.NewRequest("POST", _endpoint+name, strings.NewReader(q))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 		resp, err := client.Do(req)
 		if err != nil {
 			log.Warn("Error updating server")
@@ -30,87 +32,55 @@ func apiCall(req *http.Request) bool {
 		if err != nil {
 			log.Warn("Body reading error")
 		}
-		return true
-	}
-	return false
-}
-
-func driveUpdateStatus() {
-	t := time.Now()
-
-	h := t.Hour()
-	m := t.Minute()
-	s := t.Second()
-	if h == 2 && m == 0 {
-		if s == 0 && s < 5 {
-			log.Debug("Posting daily status")
-			postDailyStatus()
-		}
-	}
-	if m%6 == 0 {
-		log.Debug("Posting status")
-		postStatus()
+		timeString := time.Now().String()
+		PublishFailureNetwork(timeString, name)
 	}
 }
 
-func postAlarmEvent(event AlarmEvent) bool {
+func postAlarmEvent(event AlarmEvent) {
 	q := url.Values{}
 	q.Add("user", "User")
 	q.Add("state", "OFF")
-	req, _ := http.NewRequest("POST", _endpoint+"/alarmEvent", strings.NewReader(q.Encode()))
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
-	if apiCall(req) {
-		log.Debug("Request Successful")
-		return true
-	} else {
-		log.Error("Request Failed on POST AlarmEvent")
-		timeString := time.Now().String()
-		PublishFailureNetwork(timeString, "AlarmEvent")
-		return false
-	}
+	name := "/alarmEvent"
+	apiCall(q.Encode(), name)
 }
 
-func postStatus() {
+func postAccess() {
 	q := url.Values{}
-	t := time.Now()
-	q.Add("created_date", t.Format("2006-01-02"))
-	q.Add("motion_detected", "")
 	q.Add("access_granted", _statusUP.LastAccessGranted)
 	q.Add("access_denied", _statusUP.LastAccessBlocked)
-	q.Add("last_fault", "")
 	q.Add("last_user", _statusUP.LastUser)
-	q.Add("cpu_temp", strconv.Itoa(_statusSYP.Temperature))
-	q.Add("cpu_usage", strconv.Itoa(_statusSYP.HighestUsage))
-	q.Add("memory", strconv.Itoa(_statusSYP.MemoryLeft))
-	req, _ := http.NewRequest("POST", _endpoint+"/status", strings.NewReader(q.Encode()))
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
-	if apiCall(req) {
-		log.Debug("Request Successful")
-	} else {
-		log.Error("Request Failed on POST Status")
-		timeString := time.Now().String()
-		PublishFailureNetwork(timeString, "Status")
-	}
+	name := "/access"
+	apiCall(q.Encode(), name)
 }
 
-func postDailyStatus() {
+func postDevice() {
 	q := url.Values{}
-	t := time.Now()
-	q.Add("created_date", t.Format("2006-01-02"))
 	q.Add("allowed", strconv.Itoa(_statusNAC.DailyAllowedDevices))
 	q.Add("blocked", strconv.Itoa(_statusNAC.DailyBlockedDevices))
 	q.Add("unknown", strconv.Itoa(_statusNAC.DailyUnknownDevices))
-	q.Add("total_events", "")
-	q.Add("common_event", "")
-	q.Add("total_faults", strconv.Itoa(_statusFH.DailyFaults))
-	q.Add("common_fault", _statusFH.CommonFaults)
-	req, _ := http.NewRequest("POST", _endpoint+"/dailyStatus", strings.NewReader(q.Encode()))
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
-	if apiCall(req) {
-		log.Debug("Request Successful")
-	} else {
-		log.Error("Request Failed on POST DailyStatus")
-		timeString := time.Now().String()
-		PublishFailureNetwork(timeString, "Daily Status")
-	}
+	name := "/device"
+	apiCall(q.Encode(), name)
+}
+
+func postFault() {
+	q := url.Values{}
+	q.Add("name", _statusFH.LastFault)
+	name := "/fault"
+	apiCall(q.Encode(), name)
+}
+
+func postHardware() {
+	q := url.Values{}
+	q.Add("cpu_temp", strconv.Itoa(_statusSYP.Temperature))
+	q.Add("cpu_usage", strconv.Itoa(_statusSYP.HighestUsage))
+	q.Add("memory", strconv.Itoa(_statusSYP.MemoryLeft))
+	name := "/hardware"
+	apiCall(q.Encode(), name)
+}
+
+func postMotion() {
+	q := url.Values{}
+	name := "/motion"
+	apiCall(q.Encode(), name)
 }

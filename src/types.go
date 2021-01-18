@@ -89,8 +89,7 @@ type StatusSYP struct {
 }
 
 type StatusFH struct {
-	DailyFaults  int    `json:"daily_faults"`
-	CommonFaults string `json:"common_faults"`
+	LastFault string `json:"last_fault"`
 }
 
 type StatusNAC struct {
@@ -102,7 +101,6 @@ type StatusNAC struct {
 type StatusUP struct {
 	LastAccessGranted string `json:"_accessGranted"`
 	LastAccessBlocked string `json:"_accessblocked"`
-	CurrentAlarmState string `json:"_state"`
 	LastUser          string `json:"_user"`
 }
 

@@ -47,18 +47,19 @@ func convertStatusMessage(message MapMessage) bool {
 		log.Debug("Highest Usage: " + strconv.Itoa(_statusSYP.HighestUsage))
 		log.Debug("Temperature CPU: " + strconv.Itoa(_statusSYP.Temperature))
 		log.Debug("CPU Memory Left: " + strconv.Itoa(_statusSYP.MemoryLeft))
+		postHardware()
 	case message.routing_key == STATUSUP:
 		json.Unmarshal([]byte(message.message), &_statusUP)
 		log.Debug("Status for UP: ")
-		log.Debug("Current Alarm State: " + _statusUP.CurrentAlarmState)
 		log.Debug("Last access blocked: " + _statusUP.LastAccessBlocked)
 		log.Debug("Last access granted: " + _statusUP.LastAccessGranted)
 		log.Debug("Last user: " + _statusUP.LastUser)
+		postAccess()
 	case message.routing_key == STATUSFH:
 		json.Unmarshal([]byte(message.message), &_statusFH)
 		log.Debug("Status for FH: ")
-		log.Debug("Common Faults: " + _statusFH.CommonFaults)
-		log.Debug("Daily Faults: " + strconv.Itoa(_statusFH.DailyFaults))
+		log.Debug("Last Fault: " + _statusFH.LastFault)
+		postFault()
 
 	default:
 		log.Warn("We received an incorrect status")
@@ -70,32 +71,26 @@ func convertStatusMessage(message MapMessage) bool {
 func checkState() {
 	for message_id := range SubscribedMessagesMap {
 		if SubscribedMessagesMap[message_id].valid {
-			log.Debug("Message id is: ", message_id)
-			log.Debug("Message routing key is: ", SubscribedMessagesMap[message_id].routing_key)
 			switch {
 			case strings.Contains(SubscribedMessagesMap[message_id].routing_key, STATUS):
 				if convertStatusMessage(*SubscribedMessagesMap[message_id]) {
-					driveUpdateStatus()
 					SubscribedMessagesMap[message_id].valid = false
 				}
 			case SubscribedMessagesMap[message_id].routing_key == DEVICERESPONSE:
 				log.Warn("Received a device response topic")
 				var message DeviceResponse
 				json.Unmarshal([]byte(SubscribedMessagesMap[message_id].message), &message)
-				Request_id := message.Request_id
-				log.Warn(message)
-				DevicesList[Request_id].Allowed = convertStatus(message.Status)
-				DevicesList[Request_id].Device_name = message.Name
-				deviceResponse(Request_id)
+				DevicesList[message.Request_id].Allowed = convertStatus(message.Status)
+				DevicesList[message.Request_id].Device_name = message.Name
+				deviceResponse(message.Request_id)
 				SubscribedMessagesMap[message_id].valid = false
 
 			case SubscribedMessagesMap[message_id].routing_key == ALARMEVENT:
 				log.Warn("Received a alarm event topic")
 				var message AlarmEvent
 				json.Unmarshal([]byte(SubscribedMessagesMap[message_id].message), &message)
-				if postAlarmEvent(message) {
-					SubscribedMessagesMap[message_id].valid = false
-				}
+				postAlarmEvent(message)
+				SubscribedMessagesMap[message_id].valid = false
 
 			default:
 				log.Warn("We were not expecting this message unvalidating: ",

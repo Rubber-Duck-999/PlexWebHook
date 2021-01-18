@@ -30,8 +30,7 @@ func init() {
 		HighestUsage: 0}
 
 	_statusFH = StatusFH{
-		DailyFaults:  0,
-		CommonFaults: "N/A"}
+		LastFault: "N/A"}
 
 	_statusNAC = StatusNAC{
 		DevicesActive:       0,
@@ -42,7 +41,6 @@ func init() {
 	_statusUP = StatusUP{
 		LastAccessGranted: "N/A",
 		LastAccessBlocked: "N/A",
-		CurrentAlarmState: "OFF",
 		LastUser:          "N/A"}
 
 	_, _, day := time.Now().Date()

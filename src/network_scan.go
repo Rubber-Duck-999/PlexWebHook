@@ -131,6 +131,7 @@ func stateDevices(id uint32) {
 
 func checkDevices() {
 	for {
+		postDevice()
 		nmap_scan()
 		runARP()
 		log.Warn("### Devices ###")
