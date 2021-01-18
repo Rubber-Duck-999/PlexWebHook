@@ -111,24 +111,6 @@ func nmap_scan() {
 		log.Error("Warnings: ", warnings)
 	}
 
-	// Use the results to print an example output
-	for _, host := range result.Hosts {
-		if len(host.Ports) == 0 || len(host.Addresses) == 0 {
-			continue
-		}
-
-		log.Debug("Host: ", host.Addresses[0])
-
-		for _, port := range host.Ports {
-			if port.State.String() != "closed" {
-				log.Debug("# Port ID: ", port.ID)
-				log.Debug("# Protocol: ", port.Protocol)
-				log.Debug("# State: ", port.State)
-				log.Debug("# Service: ", port.Service.Name)
-			}
-		}
-	}
-
 	log.Debug("Nmap done: ", len(result.Hosts), " hosts up scanned in seconds ", result.Stats.Finished.Elapsed)
 }
 

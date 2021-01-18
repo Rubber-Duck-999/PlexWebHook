@@ -23,7 +23,7 @@ func TestStatusCheckMessageFalse(t *testing.T) {
 	failure, _ := json.Marshal(&FailureNetwork{
 		Time:         "",
 		Failure_type: ""})
-	s := string(failure[:])
+	s := string(failure)
 	message := MapMessage{
 		message:     s,
 		routing_key: FAILURENETWORK,
@@ -39,7 +39,7 @@ func TestStatusCheckMessageTrue(t *testing.T) {
 	status, _ := json.Marshal(&StatusFH{
 		DailyFaults:  0,
 		CommonFaults: ""})
-	s := string(status[:])
+	s := string(status)
 	message := MapMessage{
 		message:     s,
 		routing_key: STATUSFH,

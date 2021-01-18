@@ -160,7 +160,7 @@ func Subscribe() {
 			for d := range msgs {
 				log.Trace("Sending message to callback")
 				log.Trace(d.RoutingKey)
-				s := string(d.Body[:])
+				s := string(d.Body)
 				messages(d.RoutingKey, s)
 				log.Debug("Checking states of received messages")
 				checkState()
