@@ -12,8 +12,6 @@ var conn *amqp.Connection
 var ch *amqp.Channel
 var init_err error
 var password string
-var pinCode int
-var day int
 
 //Status
 var _statusSYP StatusSYP
@@ -25,6 +23,7 @@ var _statusUP StatusUP
 
 func init() {
 	log.Trace("Initialised rabbitmq package")
+	password = ""
 	_statusSYP = StatusSYP{
 		Temperature:  0,
 		MemoryLeft:   0,
@@ -75,18 +74,16 @@ func messages(routing_key string, value string) {
 		SubscribedMessagesMap = make(map[uint32]*MapMessage)
 		messages(routing_key, value)
 	} else {
-		if key_id >= 0 {
-			_, valid := SubscribedMessagesMap[key_id]
-			if valid {
-				log.Debug("Key already exists, checking next field: ", key_id)
-				key_id++
-				messages(routing_key, value)
-			} else {
-				log.Debug("Key does not exists, adding new field: ", key_id)
-				entry := MapMessage{value, routing_key, getTime(), true}
-				SubscribedMessagesMap[key_id] = &entry
-				key_id++
-			}
+		_, valid := SubscribedMessagesMap[key_id]
+		if valid {
+			log.Debug("Key already exists, checking next field: ", key_id)
+			key_id++
+			messages(routing_key, value)
+		} else {
+			log.Debug("Key does not exists, adding new field: ", key_id)
+			entry := MapMessage{value, routing_key, getTime(), true}
+			SubscribedMessagesMap[key_id] = &entry
+			key_id++
 		}
 	}
 }

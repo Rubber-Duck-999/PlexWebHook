@@ -56,6 +56,10 @@ func runARP() {
 				log.Warn("Adding device ip: ", ip)
 				response, err := http.Get("https://api.macvendors.com/" + mac)
 
+				if err != nil {
+					log.Error("The HTTP request failed with error \n", err)
+				}
+
 				defer response.Body.Close()
 
 				data, _ := ioutil.ReadAll(response.Body)

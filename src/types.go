@@ -142,9 +142,6 @@ const UNKNOWN_STRING string = "UNKNOWN"
 //
 const START_ADDRESS string = "192.168.0."
 
-var letters = []rune("abcdefghijklmnopqrstuvwxyzAB" +
-	"CDEFGHIJKLMNOPQRSTUVWXYZ1234567890-_$£")
-
 //
 var SubscribedMessagesMap map[uint32]*MapMessage
 var DevicesList map[uint32]*Device
