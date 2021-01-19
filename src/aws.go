@@ -12,18 +12,19 @@ import (
 )
 
 var _endpoint string
+var _maxmessage int
 
 func setEndpoint(endpoint string) {
 	_endpoint = endpoint
 }
 
 func apiCall(q string, name string) {
-	call_allowed := true
 	client := http.Client{}
-	if call_allowed {
+	if _maxmessage < 100 {
 		req, _ := http.NewRequest("POST", _endpoint+name, strings.NewReader(q))
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 		resp, err := client.Do(req)
+		time.Sleep(10 * time.Second)
 		if err != nil {
 			log.Warn("Error updating server")
 			timeString := time.Now().String()
@@ -34,6 +35,9 @@ func apiCall(q string, name string) {
 		if err != nil {
 			log.Warn("Body reading error")
 		}
+		_maxmessage++
+	} else {
+		log.Error("Reached maximum capacity")
 	}
 }
 

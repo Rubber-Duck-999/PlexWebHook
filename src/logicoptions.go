@@ -42,6 +42,7 @@ func deviceResponse(request_id uint32) {
 func convertStatusMessage(message MapMessage) bool {
 	switch {
 	case message.routing_key == STATUSSYP:
+		log.Debug(message.message)
 		json.Unmarshal([]byte(message.message), &_statusSYP)
 		log.Debug("Status for SYP")
 		log.Debug("Highest Usage: " + strconv.Itoa(_statusSYP.HighestUsage))
@@ -75,7 +76,6 @@ func checkState() {
 			switch {
 			case strings.Contains(SubscribedMessagesMap[message_id].routing_key, STATUS):
 				if convertStatusMessage(*SubscribedMessagesMap[message_id]) {
-					log.Error("Invalid")
 					SubscribedMessagesMap[message_id].valid = false
 				}
 			case SubscribedMessagesMap[message_id].routing_key == DEVICERESPONSE:

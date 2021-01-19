@@ -24,6 +24,7 @@ var _statusUP StatusUP
 func init() {
 	log.Trace("Initialised rabbitmq package")
 	password = ""
+	_maxmessage = 0
 	_statusSYP = StatusSYP{
 		Temperature:  0,
 		MemoryLeft:   0,
