@@ -65,7 +65,7 @@ func convertStatusMessage(message MapMessage) bool {
 		log.Warn("We received an incorrect status")
 		return false
 	}
-	return true
+
 }
 
 func checkState() {
@@ -74,6 +74,7 @@ func checkState() {
 			switch {
 			case strings.Contains(SubscribedMessagesMap[message_id].routing_key, STATUS):
 				if convertStatusMessage(*SubscribedMessagesMap[message_id]) {
+					log.Error("Invalid")
 					SubscribedMessagesMap[message_id].valid = false
 				}
 			case SubscribedMessagesMap[message_id].routing_key == DEVICERESPONSE:
