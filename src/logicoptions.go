@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -60,6 +61,7 @@ func convertStatusMessage(message MapMessage) bool {
 		log.Debug("Status for FH: ")
 		log.Debug("Last Fault: " + _statusFH.LastFault)
 		postFault()
+		time.Sleep(5 * time.Second)
 
 	default:
 		log.Warn("We received an incorrect status")
