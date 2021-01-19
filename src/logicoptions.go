@@ -73,11 +73,13 @@ func checkState() {
 	for message_id := range SubscribedMessagesMap {
 		if SubscribedMessagesMap[message_id].valid {
 			switch {
-			case strings.Contains(SubscribedMessagesMap[message_id].routing_key, STATUS):
-				if convertStatusMessage(*SubscribedMessagesMap[message_id]) {
-					log.Error("Invalid")
-					SubscribedMessagesMap[message_id].valid = false
-				}
+			/*
+				case strings.Contains(SubscribedMessagesMap[message_id].routing_key, STATUS):
+					if convertStatusMessage(*SubscribedMessagesMap[message_id]) {
+						log.Error("Invalid")
+						SubscribedMessagesMap[message_id].valid = false
+					}
+			*/
 			case SubscribedMessagesMap[message_id].routing_key == DEVICERESPONSE:
 				log.Warn("Received a device response topic")
 				var message DeviceResponse
