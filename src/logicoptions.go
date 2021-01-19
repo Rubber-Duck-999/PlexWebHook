@@ -65,6 +65,7 @@ func convertStatusMessage(message MapMessage) bool {
 		log.Warn("We received an incorrect status")
 		return false
 	}
+	return true
 
 }
 
