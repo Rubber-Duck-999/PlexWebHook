@@ -18,7 +18,7 @@ func setEndpoint(endpoint string) {
 }
 
 func apiCall(q string, name string) {
-	call_allowed := false
+	call_allowed := true
 	client := http.Client{}
 	if call_allowed {
 		req, _ := http.NewRequest("POST", _endpoint+name, strings.NewReader(q))
