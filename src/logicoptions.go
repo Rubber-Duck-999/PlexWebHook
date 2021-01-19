@@ -44,21 +44,21 @@ func convertStatusMessage(message MapMessage) bool {
 	switch {
 	case message.routing_key == STATUSSYP:
 		json.Unmarshal([]byte(message.message), &_statusSYP)
-		log.Debug("Status for SYP: ")
+		log.Debug("Status for SYP")
 		log.Debug("Highest Usage: " + strconv.Itoa(_statusSYP.HighestUsage))
 		log.Debug("Temperature CPU: " + strconv.Itoa(_statusSYP.Temperature))
 		log.Debug("CPU Memory Left: " + strconv.Itoa(_statusSYP.MemoryLeft))
 		postHardware()
 	case message.routing_key == STATUSUP:
 		json.Unmarshal([]byte(message.message), &_statusUP)
-		log.Debug("Status for UP: ")
+		log.Debug("Status for UP")
 		log.Debug("Last access blocked: " + _statusUP.LastAccessBlocked)
 		log.Debug("Last access granted: " + _statusUP.LastAccessGranted)
 		log.Debug("Last user: " + _statusUP.LastUser)
 		postAccess()
 	case message.routing_key == STATUSFH:
 		json.Unmarshal([]byte(message.message), &_statusFH)
-		log.Debug("Status for FH: ")
+		log.Debug("Status for FH")
 		log.Debug("Last Fault: " + _statusFH.LastFault)
 		postFault()
 		time.Sleep(5 * time.Second)

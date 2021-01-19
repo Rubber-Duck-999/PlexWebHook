@@ -26,14 +26,14 @@ func apiCall(q string, name string) {
 		resp, err := client.Do(req)
 		if err != nil {
 			log.Warn("Error updating server")
+			timeString := time.Now().String()
+			PublishFailureNetwork(timeString, name)
 		}
 		defer resp.Body.Close()
 		_, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.Warn("Body reading error")
 		}
-		timeString := time.Now().String()
-		PublishFailureNetwork(timeString, name)
 	}
 }
 
