@@ -13,37 +13,11 @@ var ch *amqp.Channel
 var init_err error
 var password string
 
-//Status
-var _statusSYP StatusSYP
-var _statusFH StatusFH
-var _statusNAC StatusNAC
-var _statusUP StatusUP
-
 //
 
 func init() {
 	log.Trace("Initialised rabbitmq package")
 	password = ""
-	_maxmessage = 0
-	_statusSYP = StatusSYP{
-		Temperature:  0,
-		MemoryLeft:   0,
-		HighestUsage: 0}
-
-	_statusFH = StatusFH{
-		LastFault: "N/A"}
-
-	_statusNAC = StatusNAC{
-		DevicesActive:       0,
-		DailyBlockedDevices: 0,
-		DailyUnknownDevices: 0,
-		DailyAllowedDevices: 0}
-
-	_statusUP = StatusUP{
-		LastAccessGranted: "N/A",
-		LastAccessBlocked: "N/A",
-		LastUser:          "N/A"}
-
 	_, _, day := time.Now().Date()
 	log.Debug("Day currently: ", day)
 }
@@ -101,12 +75,8 @@ func Subscribe() {
 
 	DevicesList = make(map[uint32]*Device)
 	if init == nil {
-		var topics = [5]string{
+		var topics = [1]string{
 			DEVICERESPONSE,
-			STATUSSYP,
-			STATUSFH,
-			STATUSUP,
-			ALARMEVENT,
 		}
 
 		err := ch.ExchangeDeclare(
@@ -170,23 +140,8 @@ func Subscribe() {
 
 		go checkDevices()
 
-		go StatusCheck()
-
 		log.Trace(" [*] Waiting for logs. To exit press CTRL+C")
 		<-forever
-	}
-}
-
-func StatusCheck() {
-	done := false
-	for {
-		if !done {
-			PublishStatusRequest()
-			done = true
-		} else {
-			done = false
-		}
-		time.Sleep(15 * time.Minute)
 	}
 }
 
@@ -207,14 +162,6 @@ func Publish(message []byte, routingKey string) string {
 		}
 	}
 	return ""
-}
-
-func PublishStatusRequest() {
-	log.Debug("Publishing Status Request")
-	message, _ := json.Marshal(&FailureNetwork{
-		Time:         "",
-		Failure_type: ""})
-	Publish(message, STATUSREQUESTUP)
 }
 
 func PublishFailureNetwork(time string, reason string) string {

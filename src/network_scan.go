@@ -115,26 +115,14 @@ func stateDevices(id uint32) {
 		PublishDeviceRequest(id,
 			DevicesList[id].Device_name,
 			DevicesList[id].Mac)
-	} else if DevicesList[id].Allowed == ALLOWED {
-		_statusNAC.DailyAllowedDevices++
-	} else if DevicesList[id].Allowed == BLOCKED {
-		_statusNAC.DailyBlockedDevices++
-	} else if DevicesList[id].Allowed == UNKNOWN {
-		_statusNAC.DailyUnknownDevices++
 	}
-	_statusNAC.DevicesActive++
 }
 
 func checkDevices() {
 	for {
-		postDevice()
 		nmap_scan()
 		runARP()
 		log.Warn("### Devices ###")
-		_statusNAC.DevicesActive = 0
-		_statusNAC.DailyAllowedDevices = 0
-		_statusNAC.DailyBlockedDevices = 0
-		_statusNAC.DailyUnknownDevices = 0
 		for id := range DevicesList {
 			log.Warn("Device - ", DevicesList[id].Device_name, " : ",
 				DevicesList[id].Ip_address, " : ",
@@ -147,7 +135,6 @@ func checkDevices() {
 			}
 		}
 		log.Debug("### End of ARP ###")
-		log.Debug("Current StatusNac: ", _statusNAC)
 		time.Sleep(4 * time.Minute)
 	}
 }

@@ -27,7 +27,6 @@ func main() {
 	if Exists(file) {
 		GetData(&data, file)
 		SetCodes(data.Settings.Code)
-		setEndpoint(data.Settings.Url)
 		Subscribe()
 	} else {
 		log.Error("File doesn't exist")

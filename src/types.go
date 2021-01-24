@@ -3,7 +3,6 @@ package main
 type ConfigTypes struct {
 	Settings struct {
 		Code string `yaml:"code"`
-		Url  string `yaml:"endpoint"`
 	} `yaml:"settings"`
 }
 
@@ -51,71 +50,10 @@ type DeviceResponse struct {
 	Status     string `json:"status"`
 }
 
-// Alarm Event
-type AlarmEvent struct {
-	User  string `json:"user"`
-	State string `json:"state"`
-}
-
-// Daily Status
-type DailyStatus struct {
-	CreatedDate string
-	Allowed     int
-	Blocked     int
-	Unknown     int
-	TotalEvents int
-	CommonEvent string
-	TotalFaults int
-	CommonFault string
-}
-
-// Status
-type Status struct {
-	CreatedDate    string
-	MotionDetected string
-	AccessGranted  string
-	AccessDenied   string
-	LastFault      string
-	LastUser       string
-	CPUTemp        int
-	CPUUsage       int
-	Memory         int
-}
-
-type StatusSYP struct {
-	Temperature  int `json:"temperature"`
-	MemoryLeft   int `json:"memory_left"`
-	HighestUsage int `json:"highest_usage"`
-}
-
-type StatusFH struct {
-	LastFault string `json:"last_fault"`
-}
-
-type StatusNAC struct {
-	DevicesActive       int `json:"devices_active"`
-	DailyBlockedDevices int `json:"blocked"`
-	DailyUnknownDevices int `json:"unknown"`
-	DailyAllowedDevices int `json:"allowed"`
-}
-type StatusUP struct {
-	LastAccessGranted string `json:"_accessGranted"`
-	LastAccessBlocked string `json:"_accessblocked"`
-	LastUser          string `json:"_user"`
-}
-
-const STATUSSYP string = "Status.SYP"
-const STATUSFH string = "Status.FH"
-const STATUSUP string = "Status.UP"
-const STATUSALL string = "Status.*"
-const STATUS string = "Status."
-const STATUSREQUESTUP string = "Status.Request.UP"
-
 //
 const DEVICERESPONSE string = "Device.Response"
 const FAILURENETWORK string = "Failure.Network"
 const DEVICEFOUND string = "Device.Found"
-const ALARMEVENT string = "Alarm.Event"
 const DEVICEREQUEST string = "Device.Request"
 
 //

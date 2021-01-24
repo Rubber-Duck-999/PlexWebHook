@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"strconv"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
@@ -39,45 +38,10 @@ func deviceResponse(request_id uint32) {
 	}
 }
 
-func convertStatusMessage(message MapMessage) bool {
-	switch {
-	case message.routing_key == STATUSSYP:
-		log.Debug(message.message)
-		json.Unmarshal([]byte(message.message), &_statusSYP)
-		log.Debug("Status for SYP")
-		log.Debug("Highest Usage: " + strconv.Itoa(_statusSYP.HighestUsage))
-		log.Debug("Temperature CPU: " + strconv.Itoa(_statusSYP.Temperature))
-		log.Debug("CPU Memory Left: " + strconv.Itoa(_statusSYP.MemoryLeft))
-		postHardware()
-	case message.routing_key == STATUSUP:
-		json.Unmarshal([]byte(message.message), &_statusUP)
-		log.Debug("Status for UP")
-		log.Debug("Last access blocked: " + _statusUP.LastAccessBlocked)
-		log.Debug("Last access granted: " + _statusUP.LastAccessGranted)
-		log.Debug("Last user: " + _statusUP.LastUser)
-		postAccess()
-	case message.routing_key == STATUSFH:
-		json.Unmarshal([]byte(message.message), &_statusFH)
-		log.Debug("Status for FH")
-		log.Debug("Last Fault: " + _statusFH.LastFault)
-		postFault()
-
-	default:
-		log.Warn("We received an incorrect status")
-		return false
-	}
-	return true
-
-}
-
 func checkState() {
 	for message_id := range SubscribedMessagesMap {
 		if SubscribedMessagesMap[message_id].valid {
 			switch {
-			case strings.Contains(SubscribedMessagesMap[message_id].routing_key, STATUS):
-				if convertStatusMessage(*SubscribedMessagesMap[message_id]) {
-					SubscribedMessagesMap[message_id].valid = false
-				}
 			case SubscribedMessagesMap[message_id].routing_key == DEVICERESPONSE:
 				log.Warn("Received a device response topic")
 				var message DeviceResponse
@@ -85,13 +49,6 @@ func checkState() {
 				DevicesList[message.Request_id].Allowed = convertStatus(message.Status)
 				DevicesList[message.Request_id].Device_name = message.Name
 				deviceResponse(message.Request_id)
-				SubscribedMessagesMap[message_id].valid = false
-
-			case SubscribedMessagesMap[message_id].routing_key == ALARMEVENT:
-				log.Warn("Received a alarm event topic")
-				var message AlarmEvent
-				json.Unmarshal([]byte(SubscribedMessagesMap[message_id].message), &message)
-				postAlarmEvent(message)
 				SubscribedMessagesMap[message_id].valid = false
 
 			default:
