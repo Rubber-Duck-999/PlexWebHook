@@ -87,7 +87,7 @@ class Ping:
         while True:
             for admin in self.admin:
                 self.publish_data(self.ping_check(admin))
-                logging.info('Address: {}, Attempted ping: {}'.format(admin, state))
+                logging.info('Address: {}, Attempted ping: {}'.format(admin, True))
             time.sleep(60 * 3)
 
 
