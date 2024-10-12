@@ -16,23 +16,22 @@ public class WebhookController {
     public ResponseEntity<String> handleMultipartWebhook(
             @RequestParam Map<String, String> formData,
             @RequestPart(value = "file", required = false ) MultipartFile file) {
-
         // ObjectMapper for JSON parsing
         ObjectMapper objectMapper = new ObjectMapper();
-
-        // Log the received form data (payload)
-        System.out.println("Received Form Data: " + formData);
-
         // Extract specific form fields from the payload
         String payload = formData.get("payload");
         try {
             @SuppressWarnings("unchecked")
             Map<String, Object> payloadJSON = objectMapper.readValue(payload, Map.class);
-            System.out.println("Parsed Payload: " + payloadJSON);
+            // Get a specific key's value (e.g., "user")
+            String event = (String) payloadJSON.get("event");
+            if (event != null) {
+                System.out.println("Event: " + event);
+            }
         } catch (Exception e) {
             System.err.println("Failed to parse JSON payload");
+            System.out.println("Parsed Payload: " + payload);
         }
-
         // Handle file upload if present
         if (file != null && !file.isEmpty()) {
             try {
