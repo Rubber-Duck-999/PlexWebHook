@@ -14,7 +14,7 @@ public class WebhookController {
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<String> handleMultipartWebhook(
             @RequestParam Map<String, String> formData,
-            @RequestPart("file") MultipartFile file) {
+            @RequestPart(value = "file", required = false ) MultipartFile file) {
 
         // Log the received form data (payload)
         System.out.println("Received Form Data: " + formData);
