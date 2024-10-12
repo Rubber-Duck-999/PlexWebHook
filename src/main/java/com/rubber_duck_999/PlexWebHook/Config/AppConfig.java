@@ -1,3 +1,5 @@
+package com.rubber_duck_999.PlexWebHook.Config;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
