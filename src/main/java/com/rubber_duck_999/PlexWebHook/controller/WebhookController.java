@@ -1,6 +1,7 @@
 package com.rubber_duck_999.PlexWebHook.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rubber_duck_999.PlexWebHook.model.Metadata;
 import com.rubber_duck_999.PlexWebHook.service.NtfyService;
 
 import org.springframework.web.bind.annotation.*;
@@ -35,24 +36,23 @@ public class WebhookController {
             // Get a specific key's value (e.g., "user")
             String event = (String) payloadJSON.get("event");
             if (event != null) {
-                System.out.println("Event: " + event);
-                String notificationMessage = "Event: " + event;
-                ntfyService.sendNotification("webhook-events-6677", notificationMessage);
+                if (event == "library:new") {
+                    Metadata metadata = (Metadata) payloadJSON.get("Metadata");
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Title: ").append(metadata.getTitle()).append("\n");
+                    sb.append("Type: ").append(metadata.getType()).append("\n");
+                    sb.append("Library Section: ").append(metadata.getLibrarySectionTitle()).append(" (").append(metadata.getLibrarySectionType()).append(")\n");
+                    sb.append("Parent Title: ").append(metadata.getParentTitle()).append("\n");
+                    sb.append("Grandparent Title: ").append(metadata.getGrandparentTitle()).append("\n");
+                    sb.append("Content Rating: ").append(metadata.getContentRating()).append("\n");
+                    sb.append("Summary: ").append(metadata.getSummary()).append("\n");
+                    ntfyService.sendNotification("webhook-events-6677", sb.toString());
+                }
             }
         } catch (Exception e) {
             System.err.println("Failed to parse JSON payload");
             System.out.println("Parsed Payload: " + payload);
         }
-        // Handle file upload if present
-        if (file != null && !file.isEmpty()) {
-            try {
-                String fileContent = new String(file.getBytes());
-                System.out.println("File content: " + fileContent);
-            } catch (Exception e) {
-                return new ResponseEntity<>("Failed to process file", HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
-
         return new ResponseEntity<>("Webhook received successfully", HttpStatus.OK);
     }
 }
