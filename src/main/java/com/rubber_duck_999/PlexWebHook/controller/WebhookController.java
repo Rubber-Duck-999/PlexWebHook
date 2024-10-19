@@ -35,21 +35,29 @@ public class WebhookController {
             // Get a specific key's value (e.g., "user")
             String event = (String) payloadJSON.get("event");
             if (event != null) {
-                if (event == "library:new") {
-                    Metadata metadata = (Metadata) payloadJSON.get("Metadata");
-                    System.out.println("Metadata: " + metadata.getLibrarySectionTitle());
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Title: ").append(metadata.getTitle()).append("\n");
-                    sb.append("Library Section: ").append(metadata.getLibrarySectionTitle()).append(" (").append(metadata.getLibrarySectionType()).append(")\n");
-                    sb.append("Parent Title: ").append(metadata.getParentTitle()).append("\n");
-                    sb.append("Grandparent Title: ").append(metadata.getGrandparentTitle()).append("\n");
-                    sb.append("Content Rating: ").append(metadata.getContentRating()).append("\n");
-                    ntfyService.sendNotification("webhook-events-6677", sb.toString());
+                System.out.println("Event: " + event);
+                if (event.equals("library:new")) {
+                    Map<String, Object> metadataMap = (Map<String, Object>) payloadJSON.get("Metadata");
+                    if (metadataMap != null) {
+                        // Convert the metadataMap into a Metadata object using ObjectMapper
+                        Metadata metadata = objectMapper.convertValue(metadataMap, Metadata.class);
+                        // Use your notification logic here
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("Type: ").append(metadata.getType()).append("\n");
+                        sb.append("GrandparentTitle: ").append(metadata.getGrandparentTitle()).append("\n");
+                        sb.append("ParentTitle: ").append(metadata.getParentTitle()).append("\n");
+                        sb.append("Title: ").append(metadata.getTitle()).append("\n");
+                        sb.append("Library Section: ").append(metadata.getLibrarySectionTitle()).append(" (")
+                          .append(metadata.getLibrarySectionType()).append(")\n");
+                        sb.append("Summary: ").append(metadata.getSummary()).append("\n");
+                        System.out.println("Message: \n" + sb.toString());
+                        ntfyService.sendNotification("webhook-events-7777", sb.toString());
+                    }
                 }
             }
         } catch (Exception e) {
-            System.err.println("Failed to parse JSON payload");
-            System.out.println("Parsed Payload: " + payload);
+            System.err.println("Failed to parse JSON payload: " + e.toString());
+            System.out.println("Parsed Payload: " + payload.length());
         }
         return new ResponseEntity<>("Webhook received successfully", HttpStatus.OK);
     }
