@@ -7,7 +7,6 @@ import com.rubber_duck_999.PlexWebHook.service.NtfyService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties.ClientType;
 import org.springframework.http.HttpStatus;
 
 import java.util.Map;
@@ -38,14 +37,13 @@ public class WebhookController {
             if (event != null) {
                 if (event == "library:new") {
                     Metadata metadata = (Metadata) payloadJSON.get("Metadata");
+                    System.out.println("Metadata: " + metadata.getLibrarySectionTitle());
                     StringBuilder sb = new StringBuilder();
                     sb.append("Title: ").append(metadata.getTitle()).append("\n");
-                    sb.append("Type: ").append(metadata.getType()).append("\n");
                     sb.append("Library Section: ").append(metadata.getLibrarySectionTitle()).append(" (").append(metadata.getLibrarySectionType()).append(")\n");
                     sb.append("Parent Title: ").append(metadata.getParentTitle()).append("\n");
                     sb.append("Grandparent Title: ").append(metadata.getGrandparentTitle()).append("\n");
                     sb.append("Content Rating: ").append(metadata.getContentRating()).append("\n");
-                    sb.append("Summary: ").append(metadata.getSummary()).append("\n");
                     ntfyService.sendNotification("webhook-events-6677", sb.toString());
                 }
             }
