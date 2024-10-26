@@ -36,7 +36,7 @@ public class WebhookController {
             String event = (String) payloadJSON.get("event");
             if (event != null) {
                 System.out.println("Event: " + event);
-                if (event.equals("library:new")) {
+                if (event.equals("library.new")) {
                     Map<String, Object> metadataMap = (Map<String, Object>) payloadJSON.get("Metadata");
                     if (metadataMap != null) {
                         // Convert the metadataMap into a Metadata object using ObjectMapper
